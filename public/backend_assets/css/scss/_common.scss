@@ -1,0 +1,136 @@
+.color-white {
+    color: #fff;
+}
+
+.border-radius-0 {
+    border-radius: 0;
+}
+
+img {
+    max-width: 100%;
+}
+
+.table-grid-admin {
+    td, th {
+        vertical-align: middle;
+        border: 1px dotted rgba(222, 226, 230, 0.6);
+        padding: 5px;
+    }
+
+    .grid_row, .grid_row2 {
+        select, input {
+            height: 30px;
+            padding: 0 5px;
+        }
+
+        img {
+            object-fit: cover;
+        }
+
+        input {
+            max-width: 100%;
+        }
+    }
+
+    #order_no {
+        width: 77px;
+    }
+}
+
+.form-filter-top-index {
+    input {
+        height: 31px;
+    }
+
+    .form-group {
+        input, select {
+            height: 31px;
+        }
+
+        select {
+            padding: 3px;
+        }
+    }
+}
+
+
+.autocomplete-results {
+    position: absolute;
+    top: 0;
+    width: 320px;
+    background: #fff;
+    z-index: 99999;
+    box-shadow: 0px 1px 10px rgba(0, 0, 0, .2);
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+    border: 1px solid #b1b1b1;
+    display: none;
+
+    .autocomplete-item {
+        padding: 6px 10px;
+        border-bottom: 1px solid #eee;
+
+        &:hover, &.active {
+            cursor: pointer;
+            background-color: #eaeaea;
+        }
+
+        &:last-child {
+            border-bottom: 0;
+        }
+
+        p {
+            margin: 0;
+            line-height: 18px;
+
+            &.hint {
+                font-size: 13px;
+                color: rgb(125, 125, 125);
+            }
+        }
+    }
+}
+
+.autocomplete-wrap {
+    position: relative;
+
+    .spinner-border {
+        position: absolute;
+        right: 0;
+        top: 10px;
+        width: 20px;
+        height: 20px;
+        display: none;
+        border: 2px solid currentColor;
+        border-right-color: transparent;
+    }
+}
+
+.custom-switch {
+    &.custom-switch-md {
+        .custom-control-label {
+            padding-left: 2rem;
+            padding-bottom: 1.5rem;
+
+            &::before {
+                height: 1.5rem;
+                width: calc(2rem + 0.75rem);
+                border-radius: 3rem;
+            }
+
+            &::after {
+                width: calc(1.5rem - 4px);
+                height: calc(1.5rem - 4px);
+                border-radius: calc(2rem - (1.5rem / 2));
+            }
+        }
+
+        .custom-control-input:checked ~ .custom-control-label::after {
+            transform: translateX(calc(1.5rem - 0.25rem));
+        }
+    }
+}
+
+.w-100px {
+    width: 100px;
+}

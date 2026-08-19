@@ -1,0 +1,184 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Post;
+use Illuminate\Http\Request;
+use App\Models\Setting;
+use App\Models\Category;
+use Illuminate\Support\Facades\App;
+
+class PostController extends Controller
+{
+    public function index(Request $request, Category $category)
+    {
+        $clsPost = new Post();
+
+        $paginate = 15;
+        $category_ids = $category->allChildrenIds();
+
+        $posts = Post::whereHas('categories', function ($q) use ($category_ids) {
+            $q->whereIn('categories.id', $category_ids);
+        })
+            ->with('categories')
+            ->active()
+            ->language()
+            ->orderBy('priority')
+            ->orderBy('id', 'desc')
+            ->simplePaginate($paginate);
+
+        $list_latest_post = $clsPost->getListLatestPost();
+        $list_category = Category::getAllMenuLink(0, Category::CATEGORY_TYPE_POST);
+
+        $setting = Setting::getAllSetting();
+        $setting['meta_title'] = ($category->meta_title) ?: $category->name;
+        $setting['meta_keywords'] = ($category->meta_keywords) ?: $setting['meta_keywords'];
+        $setting['meta_description'] = ($category->meta_description) ?: $setting['meta_description'];
+
+        return view('frontend.post.index',
+            compact(
+                'category',
+                'posts',
+                'list_latest_post',
+                'list_category',
+                'setting'
+            )
+        );
+    }
+
+    public function all(Request $request)
+    {
+        $clsPost = new Post();
+
+        $paginate = 15;
+        $query_post = Post::with('categories')
+            ->active()
+            ->language()
+            ->orderBy('id', 'desc');
+        $posts = $query_post->simplePaginate($paginate);
+
+        $list_latest_post = $clsPost->getListLatestPost();
+        $list_category = Category::getAllMenuLink(0, Category::CATEGORY_TYPE_POST);
+
+        $setting = Setting::getAllSetting();
+        $setting['meta_title'] = 'All Posts';
+
+        return view('frontend.post.index',
+            compact(
+                'posts',
+                'list_latest_post',
+                'list_category',
+                'setting'
+            )
+        );
+    }
+
+    public function search(Request $request)
+    {
+        $language = App::getLocale();
+        $category = new Category();
+        $clsPost = new Post();
+
+        $key = $request->get('key');
+
+        $paginate = 8;
+        $query_post = Post::with('category')
+            ->where('status', 1)
+            ->where('language', $language)
+            ->where('name', 'like', '%' . $key . '%')
+            ->orderBy('priority')
+            ->orderBy('id', 'desc');
+        $posts = $query_post->paginate($paginate);
+
+        $category->name = 'Kết quả tìm kiếm cho từ khóa "' . $key . '"';
+        $children_category = $category->getChildrenCategories();
+
+        $list_post_popular = $clsPost->getListPopular(4);
+
+        $setting = Setting::getAllSetting();
+        $setting['meta_title'] = 'Search';
+
+        return view('frontend.post.index',
+            compact(
+                'posts',
+                'key',
+                'category',
+                'children_category',
+                'list_post_popular',
+                'setting'
+            )
+        );
+    }
+
+    public function detail(Request $request, $slug, $id)
+    {
+        /* @var $post Post */
+        $clsPost = new Post();
+
+        $post = Post::with('categories')
+            ->active()
+            ->language()
+            ->where('id', $id)
+            ->firstOrFail();
+
+        $category = Category::where('id', data_get($post, 'cat_id'))->first();
+        $other_posts = $post->getOtherPost(3);
+        $list_latest_post = $clsPost->getListLatestPost();
+        $list_category = Category::getAllMenuLink(0, Category::CATEGORY_TYPE_POST);
+
+        $post->increment('view_num');
+
+        //SEO MOZ
+        $setting = Setting::getAllSetting();
+        $setting['meta_title'] = ($post->meta_title) ?: $post->name;
+        $setting['meta_keywords'] = ($post->meta_keywords) ?: $setting['meta_keywords'];
+        $setting['meta_description'] = ($post->meta_description) ?: $setting['meta_description'];
+        $setting['og_image'] = ($post->image) ?: ($setting['og_image'] ?? '');
+        $setting['body_class'] = 'post-template-default single single-post single-format-standard';
+
+        return view('frontend.post.detail',
+            compact(
+                'setting',
+                'post',
+                'category',
+                'list_latest_post',
+                'list_category',
+                'other_posts',
+            )
+        );
+    }
+
+    public function tag(Request $request, $tag)
+    {
+        if (!$tag) {
+            abort(404);
+        }
+        $clsPost = new Post();
+
+        $paginate = 15;
+        $query_post = Post::with('category')
+            ->active()
+            ->language()
+            ->where(fn($query) => $query->where('meta_keywords', 'like', '%' . $tag . '%')
+                ->orWhere('slug', 'like', '%' . $tag . '%'))
+            ->orderBy('priority')
+            ->orderBy('id', 'desc');
+        $posts = $query_post->simplePaginate($paginate);
+
+        $list_latest_post = $clsPost->getListLatestPost();
+        $list_category = Category::getAllMenuLink(0, Category::CATEGORY_TYPE_POST);
+
+        $setting = Setting::getAllSetting();
+        $setting['meta_title'] = 'Tag: ' . $tag;
+
+        return view('frontend.post.index',
+            compact(
+                'posts',
+                'tag',
+                'list_latest_post',
+                'list_category',
+                'setting'
+            )
+        );
+    }
+}

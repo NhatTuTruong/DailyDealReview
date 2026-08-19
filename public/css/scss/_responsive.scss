@@ -1,0 +1,80 @@
+/* Mixin Responsive*/
+$xxl: 1367px;
+$xl: 1200px;
+$lg: 992px;
+$md: 768px;
+$sm: 576px;
+$xs: 400px;
+$iphone5: 330px;
+
+@mixin minxl {
+    @media (min-width: #{$xl}) {
+        @content;
+    }
+}
+
+@mixin minlg {
+    @media (min-width: #{$lg}) {
+        @content;
+    }
+}
+
+@mixin minmd {
+    @media (min-width: #{$md}) {
+        @content;
+    }
+}
+
+@mixin minsm {
+    @media (min-width: #{$sm}) {
+        @content;
+    }
+}
+
+@mixin minxs {
+    @media (min-width: #{$xs}) {
+        @content;
+    }
+}
+
+@mixin maxxxl {
+    @media (max-width: #{$xxl - 1px}) {
+        @content;
+    }
+}
+
+@mixin maxxl {
+    @media (max-width: #{$xl - 1px}) {
+        @content;
+    }
+}
+
+@mixin maxlg {
+    @media (max-width: #{$lg - 1px}) {
+        @content;
+    }
+}
+
+@mixin maxmd {
+    @media (max-width: #{$md - 1px}) {
+        @content;
+    }
+}
+
+@mixin maxsm {
+    @media (max-width: #{$sm - 1px}) {
+        @content;
+    }
+}
+
+@mixin maxxs {
+    @media (max-width: #{$xs - 1px}) {
+        @content;
+    }
+}
+
+@mixin iphone5 {
+    @media (max-width: #{$iphone5}) {
+        @content;
+    }
+}

@@ -1,0 +1,129 @@
+.color-white {
+  color: #fff;
+}
+
+.border-radius-0 {
+  border-radius: 0;
+}
+
+img {
+  max-width: 100%;
+}
+
+.table-grid-admin td, .table-grid-admin th {
+  vertical-align: middle;
+  border: 1px dotted rgba(222, 226, 230, 0.6);
+  padding: 5px;
+}
+.table-grid-admin .grid_row select, .table-grid-admin .grid_row input, .table-grid-admin .grid_row2 select, .table-grid-admin .grid_row2 input {
+  height: 30px;
+  padding: 0 5px;
+}
+.table-grid-admin .grid_row img, .table-grid-admin .grid_row2 img {
+  object-fit: cover;
+}
+.table-grid-admin .grid_row input, .table-grid-admin .grid_row2 input {
+  max-width: 100%;
+}
+.table-grid-admin #order_no {
+  width: 77px;
+}
+
+.form-filter-top-index input {
+  height: 31px;
+}
+.form-filter-top-index .form-group input, .form-filter-top-index .form-group select {
+  height: 31px;
+}
+.form-filter-top-index .form-group select {
+  padding: 3px;
+}
+
+.autocomplete-results {
+  position: absolute;
+  top: 0;
+  width: 320px;
+  background: #fff;
+  z-index: 99999;
+  box-shadow: 0px 1px 10px rgba(0, 0, 0, 0.2);
+  border-bottom-left-radius: 3px;
+  border-bottom-right-radius: 3px;
+  border: 1px solid #b1b1b1;
+  display: none;
+}
+.autocomplete-results .autocomplete-item {
+  padding: 6px 10px;
+  border-bottom: 1px solid #eee;
+}
+.autocomplete-results .autocomplete-item:hover, .autocomplete-results .autocomplete-item.active {
+  cursor: pointer;
+  background-color: #eaeaea;
+}
+.autocomplete-results .autocomplete-item:last-child {
+  border-bottom: 0;
+}
+.autocomplete-results .autocomplete-item p {
+  margin: 0;
+  line-height: 18px;
+}
+.autocomplete-results .autocomplete-item p.hint {
+  font-size: 13px;
+  color: rgb(125, 125, 125);
+}
+
+.autocomplete-wrap {
+  position: relative;
+}
+.autocomplete-wrap .spinner-border {
+  position: absolute;
+  right: 0;
+  top: 10px;
+  width: 20px;
+  height: 20px;
+  display: none;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+}
+
+.custom-switch.custom-switch-md .custom-control-label {
+  padding-left: 2rem;
+  padding-bottom: 1.5rem;
+}
+.custom-switch.custom-switch-md .custom-control-label::before {
+  height: 1.5rem;
+  width: 2.75rem;
+  border-radius: 3rem;
+}
+.custom-switch.custom-switch-md .custom-control-label::after {
+  width: calc(1.5rem - 4px);
+  height: calc(1.5rem - 4px);
+  border-radius: 1.25rem;
+}
+.custom-switch.custom-switch-md .custom-control-input:checked ~ .custom-control-label::after {
+  transform: translateX(1.25rem);
+}
+
+.w-100px {
+  width: 100px;
+}
+
+.wrap-flash-sale__item {
+  border: 1px solid #dbdde0;
+  background: #f7f7f7;
+  padding: 15px;
+}
+.wrap-flash-sale__item .choose-hour {
+  margin: 15px 0;
+}
+.wrap-flash-sale__item .choose-hour__item select {
+  height: 30px;
+  margin-left: 5px;
+}
+.wrap-flash-sale__item .choose-hour__item .choose-hour__item--remove {
+  margin-left: 10px;
+}
+.wrap-flash-sale__item .choose-hour__item .choose-hour__item--remove button {
+  height: 30px;
+}
+
+/*# sourceMappingURL=style.css.map */
