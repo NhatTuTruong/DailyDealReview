@@ -50,7 +50,7 @@
                             </div>
                             <p itemprop="ratingValue"> 5.0 </p>
                             <p>&nbsp;&nbsp;/&nbsp;&nbsp;</p>
-                            <p itemprop="ratingCount">{{ number_format($store->view_num) }}</p>
+                            <p itemprop="ratingCount">{{ number_format(min($store->view_num, 100)) }}</p>
                             <p>&nbsp;&nbsp;votes&nbsp;&nbsp;</p>
                             <button class="btn btn-rate js-btn-rate js-common-log-click"
                                     data-click-log-flag="pc_brand_rate_it" data-target="#modal-brand-vote"

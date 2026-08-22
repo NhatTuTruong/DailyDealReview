@@ -23,7 +23,7 @@ Route::localized(function () {
 
     Route::get('/', [HomeController::class, 'index'])->name('home_page');
     Route::get('/home', [HomeController::class, 'index']);
-    Route::get('/sitemap.xml', [HomeController::class, 'siteMap'])->name('site_map');
+    // Route::get('/sitemap.xml', [HomeController::class, 'siteMap'])->name('site_map');
     Route::match(['get', 'post'], '/contact.html', [HomeController::class, 'contact'])->name('contact');
 
     Route::post('/search', [HomeController::class, 'search'])->name('search');
