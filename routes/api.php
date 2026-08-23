@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AffiliateController;
+use App\Http\Controllers\Api\StoreViewStatsController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,3 +19,7 @@ use Illuminate\Support\Facades\Route;
 //         Route::post('update', [AffiliateController::class, 'update']);
 //         Route::post('post', [AffiliateController::class, 'createPostRoute']);
 //     });
+
+Route::get('stores/test-changes', [StoreViewStatsController::class, 'index'])
+    ->middleware(['affiliate.key', 'throttle:120,1'])
+    ->name('api.stores.test_changes');
