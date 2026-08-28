@@ -1,7 +1,7 @@
 <!doctype html>
 <html class="{{ app()->getLocale() }}" lang="{{ app()->getLocale() }}">
 <head>
-    {!! $setting['tracking_code_head'] !!}
+    {!! $setting['tracking_code_head'] ?? '' !!}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -33,7 +33,7 @@
     <title>{{ $setting['meta_title'] }}</title>
     <meta name="keywords" content="{{ $setting['meta_keywords'] }}">
     <meta name="description" content="{{ $setting['meta_description'] }}">
-    @if($setting['noindex'])
+    @if(!empty($setting['noindex']))
         <meta name="robots" content="noindex"/>
     @else
         <meta name="robots" content="follow, index, max-snippet:-1, max-video-preview:-1, max-image-preview:large"/>
@@ -429,7 +429,7 @@
 
 </head>
 <body class="{{ $setting['body_class'] ?? 'home page-template-default page' }} wp-embed-responsive right-sidebar modern-design">
-{!! $setting['tracking_code_body'] !!}
+{!! $setting['tracking_code_body'] ?? '' !!}
 <div id="page" class="site ascendoor-site-wrapper">
 {{--    <a class="skip-link screen-reader-text" href="#primary">Skip to content</a>--}}
 {{--    <div id="loader">--}}
@@ -475,6 +475,6 @@
 <script async defer crossorigin="anonymous"
         src="https://connect.facebook.net/vi_VN/sdk.js#xfbml=1&version=v19.0&appId={{ $setting['facebook_app_id'] ?? '' }}"
         nonce="uWFE6azL"></script>
-{!! $setting['tracking_code_bottom'] !!}
+{!! $setting['tracking_code_bottom'] ?? '' !!}
 </body>
 </html>

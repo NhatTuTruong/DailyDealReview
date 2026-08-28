@@ -27,17 +27,77 @@ class Setting extends Model
         static $cached = [];
         if (isset($cached['all_setting'])) {
             return $cached['all_setting'];
-        } else {
-            $language = App::getLocale();
-            $settings = self::where('language', $language)->get();
-            $results = [];
-            foreach ($settings as $setting) {
-                $results[$setting->skey] = $setting->svalue;
-            }
-            $cached['all_setting'] = $results;
-            return $results;
         }
 
+        $language = App::getLocale();
+        $settings = self::where('language', $language)->get();
+        $results = [];
+        foreach ($settings as $setting) {
+            $results[$setting->skey] = $setting->svalue;
+        }
+
+        $cached['all_setting'] = array_merge(self::defaultSettings(), $results);
+
+        return $cached['all_setting'];
+    }
+
+    public static function defaultSettings(): array
+    {
+        return [
+            'site_name' => 'DealHunter365',
+            'slogan' => '',
+            'logo' => '',
+            'favicon' => '',
+            'noindex' => 0,
+            'allow_search_store' => 1,
+            'phone' => '',
+            'fax' => '',
+            'address' => '',
+            'email' => '',
+            'copyright' => '',
+            'google_map' => '',
+            'about_us' => '',
+            'footer_info' => '',
+            'meta_title' => 'DealHunter365 - Coupons & Deals',
+            'meta_keywords' => '',
+            'meta_description' => '',
+            'meta_tag' => '',
+            'tracking_code_head' => '',
+            'tracking_code_body' => '',
+            'tracking_code_bottom' => '',
+            'og_image' => '',
+            'facebook' => '#',
+            'youtube' => '#',
+            'twitter' => '#',
+            'instagram' => '#',
+            'pinterest' => '#',
+            'facebook_app_id' => '',
+            'author_name' => 'Admin',
+            'author_avatar' => '',
+            'author_info' => '',
+            'author_website' => '',
+            'author_facebook' => '',
+            'author_instagram' => '',
+            'author_twitter' => '',
+            'author_youtube' => '',
+            'coupon_description' => '',
+            'how_to_apply' => '',
+            'faqs' => '',
+            'ads_keyword_coupon' => '',
+            'ads_title_coupon' => '',
+            'ads_description_coupon' => '',
+            'ads_keyword_discount' => '',
+            'ads_title_discount' => '',
+            'ads_description_discount' => '',
+            'gemini_api_keys' => '',
+            'gemini_models' => "gemini-2.0-flash\n",
+            'apify_api_keys' => '',
+            'ai_auto_post_enabled' => 0,
+            'ai_auto_post_interval' => 30,
+            'body_class' => '',
+            'business_hour' => '',
+            'page_rule' => 0,
+        ];
     }
 
     public static function getSettingByKey($key, $default = '')
