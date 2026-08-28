@@ -148,7 +148,9 @@
     --white: #fff;
     --gray: #6c757d;
     --gray-dark: #343a40;
-    --primary: #f9495e;
+    --primary: #198754;
+    --bs-primary: #198754;
+    --bs-primary-rgb: 25, 135, 84;
     --secondary: #6c757d;
     --success: #28a745;
     --info: #17a2b8;
@@ -203,43 +205,47 @@ button:link {
 }
 
 a {
-    color: #f9495e
+    color: #198754
 }
 
 a:hover {
-    color: #f9495e
+    color: #198754
 }
 
 .btn-primary {
-    background-color: #f9495e;
-    border-color: #f9495e
+    background-color: #198754;
+    border-color: #198754
 }
 
 .btn-primary:hover,
 .btn-primary:not(:disabled):not(.disabled).active,
 .btn-primary:not(:disabled):not(.disabled):active {
     color: #fff;
-    background-color: #f9495e;
-    border-color: #f9495e
+    background-color: #198754;
+    border-color: #198754
 }
 
 .btn-outline-primary {
-    color: #f9495e;
-    border-color: #f9495e
+    color: #198754;
+    border-color: #198754
 }
 
 .btn-primary:not(:disabled):not(.disabled):active {
     color: #fff;
-    background-color: #f9495e;
-    border-color: #f9495e;
+    background-color: #198754;
+    border-color: #198754;
 }
 
 .btn-outline-primary:hover,
 .btn-outline-primary:not(:disabled):not(.disabled).active,
 .btn-outline-primary:not(:disabled):not(.disabled):active {
     color: #fff;
-    background-color: #f9495e;
-    border-color: #f9495e
+    background-color: #198754;
+    border-color: #198754
+}
+
+.text-primary {
+    color: #198754 !important;
 }
 
 .bg-home,
@@ -449,7 +455,7 @@ footer p.follow-us-on {
 }
 
 footer a:hover {
-    color: #ff5722
+    color: #198754
 }
 
 @media (max-width: 768px) {
@@ -498,7 +504,7 @@ footer a:hover {
 }
 
 .bi .bp .logo img {
-    max-width: 150px;
+    max-width: 70px;
 }
 
 .container-codes .bp .go-store {
@@ -555,7 +561,7 @@ footer a:hover {
     width: 200px;
     margin-bottom: 1em;
     font-weight: 700;
-    color: #f9495e;
+    color: #198754;
     text-align: left;
     padding-left: 24px
 }
@@ -602,7 +608,7 @@ footer a:hover {
 }
 
 .container-codes .container-popular-brand .brand-coupon-info .shop-link h2 {
-    color: #f9495e;
+    color: #198754;
     font-size: 15px
 }
 
@@ -662,13 +668,13 @@ footer a:hover {
     align-items: center;
     font-size: 16px;
     font-weight: 700;
-    color: #f9495e;
+    color: #198754;
     border-radius: 5px;
     background-color: #fff
 }
 
 .coupon-filter .filter-panel .filter-item-click {
-    background-color: #f9495e;
+    background-color: #198754;
     color: #fff;
     font-size: 18px;
     font-weight: 700
@@ -709,7 +715,7 @@ footer a:hover {
 }
 
 .cl .cp .deal .benefit-code {
-    color: #f9495e
+    color: #198754
 }
 
 .cl .cp .deal .deal-info .discount {
@@ -732,7 +738,7 @@ footer a:hover {
 .cl .cp .deal .deal-desc .type-code,
 .cl .cp .deal .deal-desc .type-deal {
     font-size: 16px;
-    color: #f9495e;
+    color: #198754;
     font-weight: 700;
     font-family: Lato
 }
@@ -810,7 +816,7 @@ footer a:hover {
 .container-index .cl .deal-desc .last-click-time-wrap .click-time {
     font-weight: 700;
     font-size: 16px;
-    color: #f9495e
+    color: #198754
 }
 
 .get-code,
@@ -838,11 +844,11 @@ footer a:hover {
 .get-code span {
     padding-right: 5px;
     right: 0;
-    border: 2px dashed #f9495e;
+    border: 2px dashed #198754;
     font-size: 18px;
     text-align: right;
     line-height: 36px;
-    color: #f9495e;
+    color: #198754;
     font-weight: 500;
     overflow: hidden;
 }
@@ -881,7 +887,7 @@ div.overlay {
 }
 
 .get-deal a {
-    background-color: #f9495e;
+    background-color: #198754;
     display: block;
     color: #fff;
     text-align: center;
@@ -1026,7 +1032,7 @@ div.overlay {
 }
 
 .bi .lp .links p a:hover {
-    color: #f9495e
+    color: #198754
 }
 
 .modal-dialog-key-coupon {
@@ -1038,7 +1044,7 @@ div.overlay {
 }
 
 .modal-dialog-key-coupon .modal-header {
-    border-top: 6px solid #f9495e;
+    border-top: 6px solid #198754;
     padding: 0 1rem
 }
 
@@ -1094,18 +1100,19 @@ div.overlay {
 
 .modal-dialog-key-coupon .modal-body .cp-code input {
     height: 100%;
-    border: 2px dashed #f9495e;
-    border-right: 0 #f9495e;
+    border: 2px dashed #198754;
+    border-right: 0 #198754;
     max-width: 240px;
     font-weight: 700;
     font-size: 22px;
     text-align: center;
-    text-overflow: ellipsis
+    text-overflow: ellipsis;
+    color: #198754;
 }
 
 .btn-copy.js-btn-copy {
-    background-color: #f9495e;
-    border-color: #f9495e;
+    background-color: #198754;
+    border-color: #198754;
 }
 
 .modal-dialog-key-coupon .modal-body .brand-more {
@@ -1131,7 +1138,7 @@ div.overlay {
 
 .modal-dialog-key-coupon .modal-content .key-pc-footer .key-text span #text-first-in-key {
     font-weight: 900;
-    color: #ff6d6b
+    color: #198754
 }
 
 .modal-dialog-key-coupon .modal-content .key-pc-footer .key-text span #text-second-in-key {
@@ -1209,7 +1216,7 @@ button.close {
 }
 
 .container-p404 .content-404 .title-des .title-des-link {
-    color: #f9495e
+    color: #198754
 }
 
 .rich-content-show-hide {
@@ -1547,4 +1554,31 @@ img.obj-img {
     font-size: 16px;
     font-weight: 700;
     color: #404040
+}
+
+/* Category navigation - store pages */
+header.header-style-3 .bottom-header-part {
+    background-color: #fff;
+}
+
+header.header-style-3 .bottom-header-part .main-navigation a {
+    color: #198754 !important;
+}
+
+header.header-style-3 .bottom-header-part .main-navigation a:hover,
+header.header-style-3 .bottom-header-part .main-navigation a:focus {
+    color: #157347 !important;
+}
+
+@media (min-width: 992px) {
+    header.header-style-3 .bottom-header-part .main-navigation .current_page_item > a,
+    header.header-style-3 .bottom-header-part .main-navigation .current-menu-item > a,
+    header.header-style-3 .bottom-header-part .main-navigation .current_page_ancestor > a,
+    header.header-style-3 .bottom-header-part .main-navigation .current-menu-ancestor > a {
+        color: #157347 !important;
+    }
+}
+
+header.header-style-3 .bottom-header-part .bottom-header-wrapper .bottom-header-right-part .header-search .header-search-wrap .header-search-icon {
+    color: #198754 !important;
 }

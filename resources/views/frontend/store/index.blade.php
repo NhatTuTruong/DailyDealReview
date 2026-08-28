@@ -11,8 +11,8 @@
                             <a href="#!" class="js-btn_deal_click"
                                data-url="{{ $store->getUrl() }}?offer={{ $best_offer->id }}"
                                data-affiliate_url="{{ $best_offer->url }}">
-                                <img src="{{ $store->image }}" title="{{ $store->name }} Coupons"
-                                     alt="{{ $store->name }} Coupons and Promo Code">
+                                <img src="{{ $store->image ? asset($store->image) : '/images/store.webp' }}" title="{{ $store->name }} Coupons"
+                                     alt="{{ $store->name }} Coupons and Promo Code" onerror="this.onerror=null;this.src='/images/store.webp';">
                             </a>
                         </div>
                         <a class="js-common-log-click go-store js-btn_deal_click"
@@ -246,7 +246,7 @@
                     <div class="modal-header">
                         <div class="info">
                             <div class="logo rounded-circle">
-                                <img src="{{ $store->image }}" alt="{{ $store->name }}">
+                                <img src="{{ $store->image ? asset($store->image) : '/images/store.webp' }}" alt="{{ $store->name }}" onerror="this.onerror=null;this.src='/images/store.webp';">
                             </div>
                             <p class="title">{{ $offer_modal->name }}</p>
                         </div>
@@ -297,8 +297,8 @@
 @endsection
 
 @push('bottom')
-    <link rel='stylesheet' href='{{ asset('css/deals/bootstrap.min.css') }}?v=1.1.1' media='all'/>
-    <link rel='stylesheet' href='{{ asset('css/deals/app.css') }}?v=1.1.1' media='all'/>
+    <link rel='stylesheet' href='{{ asset('css/deals/bootstrap.min.css') }}?v=1.1.3' media='all'/>
+    <link rel='stylesheet' href='{{ asset('css/deals/app.css') }}?v=1.1.3' media='all'/>
     <script src="{{ asset('js/bootstrap.bundle.min.js') }}?v=1.1.1"></script>
     <script>
         window.appHelper = {

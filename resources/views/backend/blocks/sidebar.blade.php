@@ -1,10 +1,7 @@
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
 
-    <a href="{{ route('backend_home') }}" class="brand-link">
-        <img src="{{ asset('backend_assets/images/logo.png') }}" alt="AdminLTE Logo"
-             class="brand-image img-circle elevation-3"
-             style="opacity: .8">
-        <span class="brand-text font-weight-light">{{ config('cms.name') }}</span>
+    <a href="{{ route('backend_home') }}" class="brand-link text-center">
+        <span class="brand-text font-weight-bold" style="font-size:1.1rem">{{ config('cms.name') }}</span>
     </a>
 
     <div class="sidebar">

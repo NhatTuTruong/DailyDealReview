@@ -2,13 +2,13 @@
 @use('\Illuminate\Support\HtmlString')
 
 @section('title')
-    {{ $group->exists ? 'Sửa group' : 'Thêm mới group' }}
+    {{ $group->exists ? 'Sửa nhóm quyền' : 'Thêm mới nhóm quyền' }}
 @endsection
 
 @section('breadcrumb')
     <li class="breadcrumb-item"><a href="{{ route('backend_user') }}">User</a></li>
-    <li class="breadcrumb-item"><a href="{{ route('backend_group') }}">Group</a></li>
-    <li class="breadcrumb-item active">{{ $group->exists ? 'Sửa group' : 'Thêm mới group' }}</li>
+    <li class="breadcrumb-item"><a href="{{ route('backend_group') }}">Nhóm quyền</a></li>
+    <li class="breadcrumb-item active">{{ $group->exists ? 'Sửa nhóm quyền' : 'Thêm mới nhóm quyền' }}</li>
 @endsection
 
 @section('content')

@@ -2,6 +2,39 @@
 
 @section('content')
 
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.ai-coupon-copy').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var code = btn.getAttribute('data-code') || btn.textContent.replace(/^Code:\s*/i, '').trim();
+                navigator.clipboard.writeText(code).then(function () {
+                    btn.textContent = 'Copied!';
+                    btn.classList.add('is-copied');
+                    setTimeout(function () {
+                        btn.textContent = 'Code: ' + code;
+                        btn.classList.remove('is-copied');
+                    }, 2000);
+                }).catch(function () {
+                    var ta = document.createElement('textarea');
+                    ta.value = code;
+                    ta.style.position = 'fixed';
+                    ta.style.opacity = '0';
+                    document.body.appendChild(ta);
+                    ta.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(ta);
+                    btn.textContent = 'Copied!';
+                    btn.classList.add('is-copied');
+                    setTimeout(function () {
+                        btn.textContent = 'Code: ' + code;
+                        btn.classList.remove('is-copied');
+                    }, 2000);
+                });
+            });
+        });
+    });
+    </script>
+
     <div id="content" class="site-content">
         <div class="ascendoor-wrapper">
             <div class="ascendoor-page">
@@ -17,7 +50,13 @@
                                     @endforeach
                                 </div>
                                 <header class="entry-header">
-                                    <h1 class="entry-title">{{ $post->name }}</h1>
+                                    @if($postAffUrl)
+                                        <h1 class="entry-title">
+                                            <a href="{{ $postAffUrl }}" target="_blank" rel="nofollow noopener">{{ $post->name }}</a>
+                                        </h1>
+                                    @else
+                                        <h1 class="entry-title">{{ $post->name }}</h1>
+                                    @endif
                                     <div class="mag-post-meta">
                                         <span class="post-author">
                                             <a class="url fn n" href="#!">
@@ -33,13 +72,25 @@
                                 </header><!-- .entry-header -->
                             </div>
                         </div>
-                        <div class="post-thumbnail">
-                            <img width="1280" height="853"
-                                 src="{{ $post->image }}"
-                                 class="attachment-post-thumbnail size-post-thumbnail wp-post-image"
-                                 alt="{{ $post->name }}"
-                                 decoding="async" fetchpriority="high"/>
-                        </div>
+                        @if($postAffUrl)
+                            <div class="post-thumbnail">
+                                <a href="{{ $postAffUrl }}" target="_blank" rel="nofollow noopener">
+                                    <img width="1280" height="853"
+                                         src="{{ $post->image }}"
+                                         class="attachment-post-thumbnail size-post-thumbnail wp-post-image"
+                                         alt="{{ $post->name }}"
+                                         decoding="async" fetchpriority="high"/>
+                                </a>
+                            </div>
+                        @else
+                            <div class="post-thumbnail">
+                                <img width="1280" height="853"
+                                     src="{{ $post->image }}"
+                                     class="attachment-post-thumbnail size-post-thumbnail wp-post-image"
+                                     alt="{{ $post->name }}"
+                                     decoding="async" fetchpriority="high"/>
+                            </div>
+                        @endif
                         <div class="entry-content fix-responsive">
                             {!! $post->content !!}
                         </div><!-- .entry-content -->

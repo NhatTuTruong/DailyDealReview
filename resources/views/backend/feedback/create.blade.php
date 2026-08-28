@@ -2,12 +2,12 @@
 @use('\Illuminate\Support\HtmlString')
 
 @section('title')
-    {{ $feedback->exists ? 'Sửa feedback' : 'Thêm mới feedback' }}
+    {{ $feedback->exists ? 'Sửa phản hồi' : 'Thêm mới phản hồi' }}
 @endsection
 
 @section('breadcrumb')
-    <li class="breadcrumb-item"><a href="{{ route('backend_feedback') }}">Feedback</a></li>
-    <li class="breadcrumb-item active">{{ $feedback->exists ? 'Sửa feedback' : 'Thêm mới feedback' }}</li>
+    <li class="breadcrumb-item"><a href="{{ route('backend_feedback') }}">Phản hồi</a></li>
+    <li class="breadcrumb-item active">{{ $feedback->exists ? 'Sửa phản hồi' : 'Thêm mới phản hồi' }}</li>
 @endsection
 
 @section('content')

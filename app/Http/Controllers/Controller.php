@@ -24,6 +24,7 @@ abstract class Controller
         $current_locale = App::getLocale() == config('app.fallback_locale') ? '' : App::getLocale();
 
         $list_most_view_post = $clsPost->getListMostViewPost(6);
+        $banner_posts = $clsPost->getListLatestPost(3);
 
         //Code dự án
         $setting = Setting::getAllSetting();
@@ -36,6 +37,7 @@ abstract class Controller
             'main_menu' => $main_menu,
             'footer_menu' => $footer_menu,
             'list_most_view_post' => $list_most_view_post,
+            'banner_posts' => $banner_posts,
         ];
 
         View::share('share', $share);

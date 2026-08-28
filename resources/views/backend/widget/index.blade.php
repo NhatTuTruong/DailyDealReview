@@ -5,7 +5,7 @@
 @endsection
 
 @section('breadcrumb')
-    <li class="breadcrumb-item active">Widget</li>
+    <li class="breadcrumb-item active">Tiện ích</li>
 @endsection
 
 @section('content')

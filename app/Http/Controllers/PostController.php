@@ -115,11 +115,13 @@ class PostController extends Controller
         /* @var $post Post */
         $clsPost = new Post();
 
-        $post = Post::with('categories')
+        $post = Post::with(['categories', 'store'])
             ->active()
             ->language()
             ->where('id', $id)
             ->firstOrFail();
+
+        $postAffUrl = optional($post->store)->af_website ?? '';
 
         $category = Category::where('id', data_get($post, 'cat_id'))->first();
         $other_posts = $post->getOtherPost(3);
@@ -144,6 +146,7 @@ class PostController extends Controller
                 'list_latest_post',
                 'list_category',
                 'other_posts',
+                'postAffUrl',
             )
         );
     }

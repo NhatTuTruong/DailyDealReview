@@ -22,9 +22,9 @@
                                     @foreach($list_store_popular as $popular_store)
                                         <div class="col-md-2 col-sm-2 col-xs-4 stores-item">
                                             <a href="{{ $popular_store->getUrl() }}">
-                                                <img src="{{ $popular_store->image }}" alt="{{ $popular_store->name }}"
+                                                <img src="{{ $popular_store->image ? asset($popular_store->image) : '/images/store.webp' }}" alt="{{ $popular_store->name }}"
                                                      width="180" height="110" loading="lazy"
-                                                     class="sized-img img-responsive">
+                                                     class="sized-img img-responsive" onerror="this.onerror=null;this.src='/images/store.webp';">
                                             </a>
                                         </div>
                                     @endforeach

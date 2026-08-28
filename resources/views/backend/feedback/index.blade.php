@@ -5,7 +5,7 @@
 @endsection
 
 @section('breadcrumb')
-    <li class="breadcrumb-item active">Feedback</li>
+    <li class="breadcrumb-item active">Phản hồi</li>
 @endsection
 
 @section('content')

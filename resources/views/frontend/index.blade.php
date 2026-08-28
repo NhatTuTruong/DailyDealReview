@@ -70,7 +70,7 @@
             --wp--preset--color--cyan-bluish-gray: #abb8c3;
             --wp--preset--color--white: #ffffff;
             --wp--preset--color--pale-pink: #f78da7;
-            --wp--preset--color--vivid-red: #cf2e2e;
+            --wp--preset--color--vivid-red: #198754;
             --wp--preset--color--luminous-vivid-orange: #ff6900;
             --wp--preset--color--luminous-vivid-amber: #fcb900;
             --wp--preset--color--light-green-cyan: #7bdcb5;
@@ -385,7 +385,7 @@
     <link rel='stylesheet' href='{{ asset('vendor/slick/slick.min.css') }}?v=1.1.3' media='all'/>
     <link rel='stylesheet' href='{{ asset('vendor/fontawesome/css/all.min.css') }}?v=1.1.3' media='all'/>
     <link rel='stylesheet' href='{{ asset('fonts/db0864cd1418c3620093312f4151b732.css') }}' media='all'/>
-    <link rel='stylesheet' href='{{ asset('css/style.css') }}?v=1.1.3' media='all'/>
+    <link rel='stylesheet' href='{{ asset('css/style.css') }}?v=1.2.0' media='all'/>
     <style id='ascendoor-news-style-inline-css'>
         /* Color */
 
@@ -425,6 +425,7 @@
     </style>
     <!-- Styles-->
     <link rel="stylesheet" type="text/css" href="{{ asset('css/custom.css') }}?v=1.1.3"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset('css/ai-post.css') }}?v=1.0.0"/>
 
 </head>
 <body class="{{ $setting['body_class'] ?? 'home page-template-default page' }} wp-embed-responsive right-sidebar modern-design">

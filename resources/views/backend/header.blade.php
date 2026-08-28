@@ -6,7 +6,7 @@
             </a>
         </li>
         <li class="nav-item d-none d-sm-inline-block">
-            <a href="{{ route('backend_home') }}" class="nav-link">Home</a>
+            <a href="{{ route('backend_home') }}" class="nav-link">Trang chủ</a>
         </li>
         {{--        <li class="nav-item d-none d-sm-inline-block">--}}
         {{--            <a href="{{ route('backend_post') }}" class="nav-link">Tin tức</a>--}}

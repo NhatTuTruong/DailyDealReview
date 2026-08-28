@@ -2,12 +2,12 @@
 @use('\Illuminate\Support\HtmlString')
 
 @section('title')
-    {{ $offer->exists ? 'Sửa offer' : 'Thêm mới offer' }}
+    {{ $offer->exists ? 'Sửa mã giảm giá' : 'Thêm mới mã giảm giá' }}
 @endsection
 
 @section('breadcrumb')
-    <li class="breadcrumb-item"><a href="{{ route('backend_offer') }}">Offer</a></li>
-    <li class="breadcrumb-item active">{{ $offer->exists ? 'Sửa offer' : 'Thêm mới offer' }}</li>
+    <li class="breadcrumb-item"><a href="{{ route('backend_offer') }}">Mã giảm giá</a></li>
+    <li class="breadcrumb-item active">{{ $offer->exists ? 'Sửa mã giảm giá' : 'Thêm mới mã giảm giá' }}</li>
 @endsection
 
 @section('content')

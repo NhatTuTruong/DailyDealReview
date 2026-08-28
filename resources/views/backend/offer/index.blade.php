@@ -5,7 +5,7 @@
 @endsection
 
 @section('breadcrumb')
-    <li class="breadcrumb-item active">Offer</li>
+    <li class="breadcrumb-item active">Mã giảm giá</li>
 @endsection
 
 @section('content')

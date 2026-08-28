@@ -72,13 +72,7 @@
                             <p class="site-description">{{ $setting['slogan'] }} </p>
                         </div>
                     </div>
-                    <!-- .site-branding -->
-                    <div class="mag-adver-part image">
-                        <a href="#">
-                            <img src="{{ asset('images/ad-area-f.webp') }}"
-                                 alt="Banner image">
-                        </a>
-                    </div>
+               
                 </div>
             </div>
         </div>

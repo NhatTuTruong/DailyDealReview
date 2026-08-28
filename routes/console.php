@@ -11,3 +11,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('store:capture-view-snapshot')->dailyAt('23:55');
+Schedule::command('post:auto-generate')->everyMinute();

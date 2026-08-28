@@ -99,6 +99,17 @@ class SettingController extends Controller
         return view('backend.setting.author', compact('settings'));
     }
 
+    public function ai()
+    {
+        if (!Gate::allows('setting/ai')) {
+            abort(403, self::MESSAGE_UNAUTHORIZED);
+        }
+
+        $this->selectedSubMenu('setting_ai');
+        $settings = Setting::getAllSetting();
+        return view('backend.setting.ai', compact('settings'));
+    }
+
     public function save(Request $request)
     {
         $language = App::getLocale();

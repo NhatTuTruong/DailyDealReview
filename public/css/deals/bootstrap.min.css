@@ -5317,7 +5317,7 @@ fieldset:disabled .btn {
 
 .alert-success {
     color: #0f5132;
-    background-color: #d1e7dd;
+    background-color: none !important;
     border-color: #badbcc
 }
 
@@ -8302,7 +8302,7 @@ fieldset:disabled .btn {
 
 .text-muted {
     --bs-text-opacity: 1;
-    color: #6c757d !important
+    color: #fff !important
 }
 
 .text-black-50 {

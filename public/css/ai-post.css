@@ -1,0 +1,235 @@
+/* AI Generated Post Content Styles */
+
+/* Ảnh trong nội dung — click chuyển link aff */
+.ai-content-image {
+    margin: 24px 0;
+    text-align: center;
+}
+
+.ai-content-image a {
+    display: inline-block;
+    line-height: 0;
+}
+
+.ai-content-image img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ai-content-image a:hover img {
+    transform: scale(1.01);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12);
+}
+
+/* Tiêu đề H2 — click chuyển link aff */
+.ai-heading-aff-link {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.ai-heading-aff-link:hover {
+    color: #198754;
+}
+
+/* Block Available Coupons — không khung trắng */
+.ai-coupons-compact {
+    margin: 28px 0;
+    padding: 0;
+    background: none;
+    border: none;
+}
+
+.ai-coupons-compact h3 {
+    margin: 0 0 12px;
+    font-size: 1.15rem;
+    color: #1a6e35;
+}
+
+.ai-coupon-compact-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.ai-coupon-compact-item {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 8px 0;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #333;
+}
+
+.ai-coupon-compact-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.ai-coupon-title-link {
+    color: #ebebeb;
+    font-weight: 600;
+    text-decoration: none;
+    flex: 1;
+}
+
+.ai-coupon-title-link:hover {
+    color: #198754;
+    text-decoration: underline;
+}
+
+/* Nút copy mã coupon */
+.ai-coupon-copy {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 10px;
+    border: 1.5px solid #198754;
+    border-radius: 4px;
+    background: none;
+    color: #198754;
+    font: inherit;
+    font-weight: 700;
+    font-size: 0.85em;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.ai-coupon-copy:hover {
+    background: #198754;
+    color: #fff;
+}
+
+.ai-coupon-copy.is-copied {
+    background: #198754;
+    color: #fff;
+    border-color: #198754;
+}
+
+/* Link giới thiệu đầu bài */
+.ai-aff-intro {
+    margin: 0 0 20px;
+    padding: 0;
+    background: none;
+    border: none;
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.ai-aff-text-link {
+    color: #198754;
+    font-weight: 600;
+    text-decoration: underline;
+}
+
+.ai-aff-text-link:hover {
+    color: #157347;
+}
+
+/* Nút CTA cuối bài */
+.ai-aff-outro {
+    margin: 32px 0 0;
+    text-align: center;
+}
+
+.ai-aff-link {
+    display: inline-block;
+    background: #198754;
+    color: #fff !important;
+    padding: 8px 20px;
+    border-radius: 6px;
+    text-decoration: none !important;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.ai-aff-link:hover {
+    background: #157347;
+    transform: translateY(-1px);
+    color: #fff !important;
+}
+
+.ai-cta-btn {
+    display: inline-block;
+    background: linear-gradient(135deg, #198754, #20c997);
+    color: #fff !important;
+    padding: 14px 36px;
+    border-radius: 50px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    text-decoration: none !important;
+    box-shadow: 0 4px 16px rgba(25, 135, 84, 0.35);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ai-cta-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(25, 135, 84, 0.5);
+    color: #fff !important;
+}
+
+/* Legacy coupon list (kept for older posts) */
+.ai-coupon-list {
+    list-style: none;
+    padding: 0;
+    margin: 24px 0;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.ai-coupon-list > li {
+    background: #fff;
+    border-bottom: 1px solid #eee;
+    padding: 20px 24px;
+    transition: background 0.2s ease;
+}
+
+.ai-coupon-list > li:last-child {
+    border-bottom: none;
+}
+
+.ai-coupon-list > li:hover {
+    background: #f8fff8;
+}
+
+.ai-coupon-list h3 {
+    margin: 0 0 8px;
+    font-size: 1.1rem;
+    color: #1a6e35;
+}
+
+.ai-coupon-list .ai-offer-value {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #198754;
+    margin-bottom: 8px;
+}
+
+.ai-coupon-list .ai-coupon-code {
+    background: #198754;
+    color: #fff;
+    padding: 3px 12px;
+    border-radius: 4px;
+    font-weight: 700;
+    font-size: 0.95em;
+    letter-spacing: 0.5px;
+}
+
+.ai-verified {
+    display: inline-block;
+    background: #198754;
+    color: #fff;
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin-left: 8px;
+    font-weight: 600;
+    vertical-align: middle;
+}

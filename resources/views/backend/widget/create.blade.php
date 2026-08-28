@@ -2,12 +2,12 @@
 @use('\Illuminate\Support\HtmlString')
 
 @section('title')
-    {{ $widget->exists ? 'Sửa widget' : 'Thêm mới widget' }}
+    {{ $widget->exists ? 'Sửa tiện ích' : 'Thêm mới tiện ích' }}
 @endsection
 
 @section('breadcrumb')
-    <li class="breadcrumb-item"><a href="{{ route('backend_widget') }}">Widget</a></li>
-    <li class="breadcrumb-item active">{{ $widget->exists ? 'Sửa widget' : 'Thêm mới widget' }}</li>
+    <li class="breadcrumb-item"><a href="{{ route('backend_widget') }}">Tiện ích</a></li>
+    <li class="breadcrumb-item active">{{ $widget->exists ? 'Sửa tiện ích' : 'Thêm mới tiện ích' }}</li>
 @endsection
 
 @section('content')

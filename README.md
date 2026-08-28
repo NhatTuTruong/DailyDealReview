@@ -66,3 +66,9 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
 
 https://demos.ascendoor.com/ascendoor-news/contact-us/
+
+Chạy php artisan schedule:work (hoặc cấu hình cron: * * * * * php /path/artisan schedule:run >> /dev/null 2>&1)
+
+ Command để tạo lại file mẫu:
+
+php artisan import:sample-store

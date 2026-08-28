@@ -177,9 +177,9 @@ class DataGrid
         $ext_allow = ' .jpg, .jpeg, .gif, .png, .svg';
         $ext = strtolower(strrchr($value, '.'));
         if (!empty($value)) {
-            $html = "<img src='" . "$value' " . $data_column['img_attr'] . " title='" . $value . "' style='background:#eaeaea'>";
+            $html = "<img src='" . "$value' " . $data_column['img_attr'] . " title='" . $value . "' style='background:#eaeaea' onerror=\"this.onerror=null;this.src='/images/store.webp';\">";
         } else {
-            $html = ($value == '') ? 'No Image' : $value;
+            $html = "<img src='/images/store.webp' " . $data_column['img_attr'] . " title='No Image' style='background:#eaeaea'>";
         }
         return $html;
     }

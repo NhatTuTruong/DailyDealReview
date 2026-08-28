@@ -22,6 +22,27 @@ class Post extends Model
 
     protected $dates = ['created_at', 'updated_at', 'deleted_at'];
 
+    protected $fillable = [
+        'name',
+        'slug',
+        'cat_id',
+        'store_id',
+        'image',
+        'priority',
+        'description',
+        'content',
+        'source',
+        'status',
+        'is_hot',
+        'view_num',
+        'meta_title',
+        'meta_keywords',
+        'meta_description',
+        'language',
+        'created_at',
+        'updated_at',
+    ];
+
     const array STATUS_ARRAY = [
         0 => 'Chưa duyệt',
         1 => 'Đã duyệt',
@@ -59,6 +80,11 @@ class Post extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+
+    public function store()
+    {
+        return $this->belongsTo(Store::class, 'store_id', 'id');
     }
 
     public function getUrl(): string

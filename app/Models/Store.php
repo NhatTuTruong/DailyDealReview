@@ -39,6 +39,11 @@ class Store extends Model
         return $this->hasMany(Offer::class);
     }
 
+    public function posts()
+    {
+        return $this->hasMany(Post::class, 'store_id', 'id');
+    }
+
     protected static function boot()
     {
         parent::boot();
@@ -167,6 +172,7 @@ class Store extends Model
     ];
 
     const AFFILIATE_NETS = [
+        '' => '—',
         'goaffpro' => 'Go aff pro',
         'uppromote' => 'Up promote',
         'cj' => 'CJ Affiliate',

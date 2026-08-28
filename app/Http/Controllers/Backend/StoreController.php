@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Backend;
 
 use App\Exports\StoreOfferExport;
 use App\Imports\StoreOfferImport;
+use App\Imports\StoreOfferPreview;
 use App\Libs\DataGrid;
 use App\Libs\Util;
 use App\Models\Setting;
@@ -12,6 +13,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Store;
 use App\Models\Category;
+use App\Models\Offer;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -54,9 +56,10 @@ class StoreController extends Controller
         $filter['af_net'] = $request->get('af_net', '');
         $filter['af_visit'] = $request->get('af_visit', 0);
         $filter['ads_status'] = $request->get('ads_status', '');
+        $filter['sort_by'] = $request->get('sort_by', '');
+        $filter['sort_order'] = $request->get('sort_order', 'desc');
         $query = Store::with(['category', 'user'])
-            ->where('language', $language)
-            ->orderBy('id', 'desc');
+            ->where('language', $language);
 
         if (!$user->isSuperAdmin()) {
 //            $query->where(function ($q) use ($user, $filter) {
@@ -96,6 +99,11 @@ class StoreController extends Controller
         }
         if ($filter['af_visit'] > 0) {
             $query->where('af_visit', '>=', $filter['af_visit']);
+        }
+        if ($filter['sort_by'] && in_array($filter['sort_by'], ['view_num'])) {
+            $query->orderBy($filter['sort_by'], $filter['sort_order']);
+        } else {
+            $query->orderBy('id', 'desc');
         }
 
         $stores = $query->paginate($paginate)->appends($filter);
@@ -159,6 +167,9 @@ class StoreController extends Controller
         $option_af_net = Store::makeListAfFNet($store->af_net);
         $option_ads_status = Store::makeListAdsStatus($store->ads_status);
         $option_ads_user = User::makeListUser($store->ads_user_id, true);
+        
+        $offers = $store->exists ? Offer::where('store_id', $store->id)->orderBy('priority', 'desc')->orderBy('id', 'desc')->get() : collect([]);
+        
         return view('backend.store.create', compact(
                 'store',
                 'option_categories',
@@ -166,6 +177,7 @@ class StoreController extends Controller
                 'option_af_net',
                 'option_ads_user',
                 'option_ads_status',
+                'offers',
             )
         );
     }
@@ -203,8 +215,8 @@ class StoreController extends Controller
         $store->event_id = $request->get('event_id', 0);
         $store->af_visit = $request->get('af_visit', 0);
         $store->commission_amount = $request->get('commission_amount', 0);
-        $store->af_flag = $request->get('af_flag', 'not_registered');
-        $store->af_net = $request->get('af_net', null);
+        $store->af_flag = $request->get('af_flag', 'approved');
+        $store->af_net = $request->get('af_net', '');
         $store->af_website = $request->get('af_website', '');
         $store->af_portal = $request->get('af_portal', '');
         $store->ads_email = $request->get('ads_email', '');
@@ -227,6 +239,48 @@ class StoreController extends Controller
         }
 
         $store->save();
+
+        if ($store->exists) {
+            $offerIds = $request->get('offer_id', []);
+            $offerNames = $request->get('offer_name', []);
+            $offerCodes = $request->get('offer_code', []);
+            $offerValues = $request->get('offer_value', []);
+            $offerUrls = $request->get('offer_url', []);
+            $offerStatuses = $request->get('offer_status', []);
+            $offerVerifieds = $request->get('offer_verified', []);
+            $offerOrders = $request->get('offer_order', []);
+
+            $existingIds = Offer::where('store_id', $store->id)->pluck('id')->toArray();
+            $submittedIds = array_filter($offerIds);
+
+            foreach ($existingIds as $existingId) {
+                if (!in_array($existingId, $submittedIds)) {
+                    Offer::where('id', $existingId)->delete();
+                }
+            }
+
+            foreach ($offerIds as $index => $offerId) {
+                $orderValue = $offerOrders[$index] ?? $index;
+                $offerData = [
+                    'store_id' => $store->id,
+                    'name' => $offerNames[$index] ?? '',
+                    'code' => $offerCodes[$index] ?? '',
+                    'offer' => $offerValues[$index] ?? '',
+                    'url' => $offerUrls[$index] ?? '',
+                    'status' => isset($offerStatuses[$index]) ? 1 : 0,
+                    'verified' => isset($offerVerifieds[$index]) ? 1 : 0,
+                    'priority' => count($offerIds) - $orderValue,
+                    'language' => $language,
+                    'user_id' => auth()->id(),
+                ];
+
+                if (!empty($offerId) && in_array($offerId, $existingIds)) {
+                    Offer::where('id', $offerId)->update($offerData);
+                } elseif (!empty(trim($offerNames[$index] ?? ''))) {
+                    Offer::create($offerData);
+                }
+            }
+        }
 
         return redirect()->route('backend_store_edit', $store)->with('success', 'Cập nhật thành công');
     }
@@ -295,6 +349,41 @@ class StoreController extends Controller
         $store = Store::withTrashed()->findOrFail($id);
         $store->forceDelete();
         return redirect()->route('backend_store', 'status=2')->with('success', 'Xóa store thành công');
+    }
+
+    public function importPreview(Request $request)
+    {
+        $validator = \Validator::make($request->all(), [
+            'file' => 'required|mimes:xlsx,xls|max:5120',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'File không hợp lệ',
+                'errors' => $validator->errors()->all()
+            ], 422);
+        }
+
+        try {
+            $preview = new StoreOfferPreview();
+            Excel::import($preview, $request->file('file'));
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'store_count' => $preview->storeCount,
+                    'offer_count' => $preview->offerCount,
+                    'stores' => array_slice($preview->stores, 0, 10),
+                    'total_stores' => count($preview->stores),
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể đọc file: ' . $e->getMessage()
+            ], 422);
+        }
     }
 
     public function import(Request $request)

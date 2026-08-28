@@ -5,7 +5,7 @@
 @endsection
 
 @section('breadcrumb')
-    <li class="breadcrumb-item active">Group</li>
+    <li class="breadcrumb-item active">Nhóm quyền</li>
 @endsection
 
 @section('content')

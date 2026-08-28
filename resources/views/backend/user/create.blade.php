@@ -2,12 +2,12 @@
 @use('\Illuminate\Support\HtmlString')
 
 @section('title')
-    {{ $user->exists ? 'Sửa user' : 'Thêm mới user' }}
+    {{ $user->exists ? 'Sửa người dùng' : 'Thêm mới người dùng' }}
 @endsection
 
 @section('breadcrumb')
-    <li class="breadcrumb-item"><a href="{{ route('backend_user') }}">User</a></li>
-    <li class="breadcrumb-item active">{{ $user->exists ? 'Sửa user' : 'Thêm mới user' }}</li>
+    <li class="breadcrumb-item"><a href="{{ route('backend_user') }}">Người dùng</a></li>
+    <li class="breadcrumb-item active">{{ $user->exists ? 'Sửa người dùng' : 'Thêm mới người dùng' }}</li>
 @endsection
 
 @section('content')

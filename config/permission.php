@@ -113,6 +113,8 @@ return [
             'social' => 'Cài đặt mạng xã hội',
             'ads' => 'Cấu hình Ads',
             'content' => 'Cấu hình Nội dung',
+            'author' => 'Cấu hình tác giả',
+            'ai' => 'Cấu hình AI',
         ]
     ]
 ];

@@ -5,7 +5,7 @@
 @endsection
 
 @section('breadcrumb')
-    <li class="breadcrumb-item active">Store</li>
+    <li class="breadcrumb-item active">Cửa hàng</li>
 @endsection
 
 @section('content')
@@ -63,6 +63,24 @@
                                     <input type="text" name="af_visit" class="form-control"
                                            value="{{ $filter['af_visit'] }}"
                                            placeholder="Filter visit">
+                                </div>
+                            </div>
+
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <select class="form-control" name="sort_by" onchange="this.form.submit()">
+                                        <option value="">Sắp xếp mặc định</option>
+                                        <option value="view_num" {{ ($filter['sort_by'] ?? '') == 'view_num' ? 'selected' : '' }}>Theo Lượt xem</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <select class="form-control" name="sort_order" onchange="this.form.submit()">
+                                        <option value="desc" {{ ($filter['sort_order'] ?? 'desc') == 'desc' ? 'selected' : '' }}>Giảm dần</option>
+                                        <option value="asc" {{ ($filter['sort_order'] ?? '') == 'asc' ? 'selected' : '' }}>Tăng dần</option>
+                                    </select>
                                 </div>
                             </div>
 
@@ -137,7 +155,7 @@
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Import Store & Offer</h5>
+                    <h5 class="modal-title"><i class="fa fa-file-excel mr-2"></i>Import Store & Offer</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -149,19 +167,44 @@
                             <ul class="mb-0 pl-3" id="errorList"></ul>
                         </div>
 
-                        <div class="form-group">
-                            <label>Chọn file Excel (.xlsx, .xls)</label>
-                            <input type="file" name="file" class="form-control-file" required
-                                   accept=".xlsx, .xls, .csv">
-                            <small class="text-muted">Tải file mẫu <a
-                                        href="{{ asset('backend_assets/file/sample_import.xlsx') }}">tại đây</a></small>
+                        <div id="uploadSection">
+                            <div class="form-group">
+                                <label>Chọn file Excel (.xlsx, .xls)</label>
+                                <div class="custom-file">
+                                    <input type="file" name="file" class="custom-file-input" id="fileInput" required
+                                           accept=".xlsx, .xls, .csv" onchange="previewImport(this)">
+                                    <label class="custom-file-label" for="fileInput">Chọn file...</label>
+                                </div>
+                                <small class="text-muted">Tải file mẫu <a
+                                            href="{{ asset('backend_assets/file/sample_import.xlsx') }}" target="_blank">tại đây</a></small>
+                            </div>
+                        </div>
+
+                        <div id="previewSection" class="d-none">
+                            <div class="alert alert-info mb-3">
+                                <h5 class="mb-2"><i class="fa fa-file-alt mr-1"></i> Xem trước dữ liệu:</h5>
+                                <div class="row text-center">
+                                    <div class="col-6">
+                                        <div class="h3 mb-0" id="previewStores">0</div>
+                                        <small class="text-muted">Stores mới</small>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="h3 mb-0" id="previewOffers">0</div>
+                                        <small class="text-muted">Offers</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="storeListPreview" class="small text-muted mb-2"></div>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="backToUpload()">
+                                <i class="fa fa-arrow-left mr-1"></i> Chọn file khác
+                            </button>
                         </div>
                     </div>
 
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
-                        <button type="submit" class="btn btn-primary" id="btnSubmitImport">
-                            <span id="btnText">Import</span>
+                        <button type="submit" class="btn btn-primary" id="btnSubmitImport" disabled>
+                            <span id="btnText"><i class="fa fa-upload mr-1"></i> Import</span>
                             <span id="btnLoading" class="d-none"><i
                                         class="fa fa-spinner fa-spin"></i> Đang xử lý...</span>
                         </button>
@@ -172,6 +215,60 @@
     </div>
 
     <script>
+        // Khi chọn file -> preview dữ liệu
+        async function previewImport(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('{{ route('backend_store_import_preview') }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').getAttribute('value')
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('previewStores').textContent = data.data.store_count;
+                    document.getElementById('previewOffers').textContent = data.data.offer_count;
+
+                    const listHtml = data.data.stores.slice(0, 10).map(s =>
+                        `<span class="badge badge-secondary mr-1 mb-1">${s}</span>`
+                    ).join('');
+                    document.getElementById('storeListPreview').innerHTML =
+                        '<strong>Stores:</strong> ' + listHtml +
+                        (data.data.total_stores > 10 ? ` <span class="text-muted">...và ${data.data.total_stores - 10} store khác</span>` : '');
+
+                    document.getElementById('uploadSection').classList.add('d-none');
+                    document.getElementById('previewSection').classList.remove('d-none');
+                    document.getElementById('btnSubmitImport').disabled = false;
+
+                    // Update filename
+                    document.querySelector('.custom-file-label').textContent = file.name;
+                } else {
+                    alert('Không thể đọc file: ' + data.message);
+                    input.value = '';
+                }
+            } catch (e) {
+                alert('Lỗi kết nối');
+                input.value = '';
+            }
+        }
+
+        function backToUpload() {
+            document.getElementById('uploadSection').classList.remove('d-none');
+            document.getElementById('previewSection').classList.add('d-none');
+            document.getElementById('btnSubmitImport').disabled = true;
+            document.getElementById('fileInput').value = '';
+            document.querySelector('.custom-file-label').textContent = 'Chọn file...';
+        }
+
         document.getElementById('formImport').addEventListener('submit', function (e) {
             e.preventDefault();
 
@@ -204,9 +301,21 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Thành công: Reload trang hoặc thông báo
-                        alert(data.message);
-                        location.reload();
+                        // Thành công: Hiện thông báo trong modal
+                        errorBox.classList.remove('d-none');
+                        errorBox.style.backgroundColor = '#d4edda';
+                        errorBox.style.border = '1px solid #c3e6cb';
+                        errorBox.style.color = '#155724';
+                        errorList.innerHTML = '<li style="color:#155724"><i class="fa fa-check-circle mr-2"></i>' + data.message + '</li>';
+                        document.getElementById('previewSection').classList.add('d-none');
+                        document.getElementById('btnSubmitImport').disabled = true;
+                        document.querySelector('.custom-file-label').textContent = 'Hoàn thành!';
+
+                        // Reload table sau 1.5s
+                        setTimeout(function() {
+                            $('#importModal').modal('hide');
+                            location.reload();
+                        }, 1500);
                     } else {
                         // Lỗi từ Backend trả về
                         errorBox.classList.remove('d-none');

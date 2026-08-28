@@ -12,6 +12,7 @@ use App\Http\Controllers\Backend\FeedbackController;
 use App\Http\Controllers\Backend\FileManagerController;
 use App\Http\Controllers\Backend\LandingPageController;
 use App\Http\Controllers\Backend\SettingController;
+use App\Http\Controllers\Backend\AiPostController;
 use App\Http\Controllers\Backend\WidgetController;
 use App\Http\Controllers\Backend\UserController;
 use App\Http\Controllers\Backend\GroupController;
@@ -77,6 +78,10 @@ Route::localized(function () {
             Route::get('clone/{post}', [PostController::class, 'clone'])->name('backend_post_clone');
             Route::get('restore/{id}', [PostController::class, 'restore'])->name('backend_post_restore');
             Route::get('force-delete/{id}', [PostController::class, 'forceDelete'])->name('backend_post_force_delete');
+
+            // AI Post Generator
+            Route::post('ai/generate', [AiPostController::class, 'generate'])->name('backend_post_ai_generate');
+            Route::post('ai/save', [AiPostController::class, 'saveGenerated'])->name('backend_post_ai_save');
         });
 
         Route::prefix('store')->group(function () {
@@ -85,6 +90,7 @@ Route::localized(function () {
             Route::get('create', [StoreController::class, 'edit'])->name('backend_store_create');
             Route::get('edit/{store}', [StoreController::class, 'edit'])->name('backend_store_edit');
             Route::post('save/{store?}', [StoreController::class, 'save'])->name('backend_store_save');
+            Route::post('import/preview', [StoreController::class, 'importPreview'])->name('backend_store_import_preview');
             Route::post('import', [StoreController::class, 'import'])->name('backend_store_import');
             Route::get('delete/{id}', [StoreController::class, 'delete'])->name('backend_store_delete');
             Route::post('bulk_delete', [StoreController::class, 'bulkDelete'])->name('backend_store_bulk_delete');
@@ -134,6 +140,7 @@ Route::localized(function () {
             Route::get('/seo', [SettingController::class, 'seo'])->name('backend_setting_seo');
             Route::get('/ads', [SettingController::class, 'ads'])->name('backend_setting_ads');
             Route::get('/content', [SettingController::class, 'content'])->name('backend_setting_content');
+            Route::get('/ai', [SettingController::class, 'ai'])->name('backend_setting_ai');
             Route::post('/save', [SettingController::class, 'save'])->name('backend_setting_save');
         });
 
