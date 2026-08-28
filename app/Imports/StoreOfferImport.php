@@ -104,7 +104,7 @@ class StoreOfferImport implements OnEachRow, WithHeadingRow, WithValidation, Ski
 
             if ($response !== false && !empty($response) && strlen($response) > 100) {
                 // Tạo thư mục upload nếu chưa có
-                $uploadPath = public_path('uploads/store');
+                $uploadPath = public_path('uploads/images/store');
                 if (!File::exists($uploadPath)) {
                     File::makeDirectory($uploadPath, 0755, true);
                 }
@@ -117,7 +117,7 @@ class StoreOfferImport implements OnEachRow, WithHeadingRow, WithValidation, Ski
                 File::put($fullPath, $response);
 
                 // Trả về path để lưu vào DB (public path)
-                return 'uploads/store/' . $filename;
+                return 'uploads/images/store/' . $filename;
             }
         } catch (\Exception $e) {
             // Log error nếu cần

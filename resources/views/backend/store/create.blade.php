@@ -58,7 +58,7 @@
                         <x-forms.select2 name="cat_id" label="Danh mục" :options="new HtmlString($option_categories)"
                                          :messages="$errors->get('cat_id')"/>
 
-                        <x-forms.upload name="image" value="{{ old('image') ?: $store->image }}" label="Image"
+                        <x-forms.upload name="image" value="{{ old('image') ?: $store->image }}" uploadFolder="store" label="Image"
                                         type="image" :messages="$errors->get('image')"/>
 
                         <x-forms.switch name="status" value="{{ $store->status ?? 1 }}" label="Hiển thị"

@@ -1,4 +1,4 @@
-@props(['name', 'value', 'label', 'messages', 'type', 'help', 'class_label', 'class_input'])
+@props(['name', 'value', 'label', 'messages', 'type', 'help', 'class_label', 'class_input', 'uploadFolder' => ''])
 
 <div class="form-group row">
     <label class="{{ $class_label ?? 'col-sm-3' }} col-form-label" for="{{ $name }}">
@@ -44,7 +44,8 @@
     <script>
         var button1 = document.getElementById("{{ $name }}");
         button1.onclick = function () {
-            selectFileWithCKFinder("{{$name}}_input", "{{$name}}_preview");
+            var startupPath = @json($uploadFolder ? 'Images:/' . trim($uploadFolder, '/') . '/' : '');
+            selectFileWithCKFinder("{{$name}}_input", "{{$name}}_preview", startupPath);
         };
     </script>
 </div>

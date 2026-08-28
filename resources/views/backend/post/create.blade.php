@@ -98,7 +98,7 @@
                                          :messages="$errors->get('cat_ids')" multiple="multiple" id="cat_ids"/>
                         <x-forms.input name="created_at" id="created_at" value="{{ (old('created_at') ?: $post->created_at) ?: date('Y/m/d') }}"
                                        label="Ngày đăng" :messages="$errors->get('created_at')"/>
-                        <x-forms.upload name="image" value="{{ old('image') ?: $post->image }}" label="Image"
+                        <x-forms.upload name="image" value="{{ old('image') ?: $post->image }}" uploadFolder="blog" label="Image"
                                         type="image" :messages="$errors->get('image')"/>
 
                         <x-forms.switch name="status" value="{{ $post->status ?? 1 }}" label="Hiển thị"

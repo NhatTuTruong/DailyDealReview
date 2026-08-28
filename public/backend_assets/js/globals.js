@@ -1,6 +1,6 @@
 //Chọn file với ckfinder
-function selectFileWithCKFinder(elementId, preview_image = '') {
-    CKFinder.popup({
+function selectFileWithCKFinder(elementId, preview_image = '', startupPath = '') {
+    var options = {
         chooseFiles: true,
         width: 800,
         height: 600,
@@ -24,7 +24,13 @@ function selectFileWithCKFinder(elementId, preview_image = '') {
                 }
             });
         }
-    });
+    };
+
+    if (startupPath) {
+        options.startupPath = startupPath;
+    }
+
+    CKFinder.popup(options);
 }
 
 function selectMultiFileWithCKFinder(elementId, preview_image) {

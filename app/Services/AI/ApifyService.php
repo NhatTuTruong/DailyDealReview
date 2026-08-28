@@ -2,18 +2,24 @@
 
 namespace App\Services\AI;
 
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ApifyService
 {
     private MultiKeyManager $keyManager;
 
+    /** @var array<string, string> normalized URL => local path */
+    private array $downloadCache = [];
+
+    /** @var array<string, string> content hash => local path */
+    private array $contentHashCache = [];
+
     private const ACTOR_ID = 'bvAQMqCbp6wE53JzK';
     private const ACTOR_BASE_URL = 'https://api.apify.com/v2/acts/' . self::ACTOR_ID . '/run-sync-get-dataset-items';
-    private const STORAGE_FOLDER = 'blog';
+    private const UPLOAD_DIR = 'uploads/images/blog';
     private const MIN_IMAGE_WIDTH = 600;
     private const MIN_IMAGE_HEIGHT = 400;
 
@@ -37,6 +43,8 @@ class ApifyService
 
         $contentCount = max(2, min(3, $contentCount));
         $query = $this->normalizeImageQuery($query);
+        $this->downloadCache = [];
+        $this->contentHashCache = [];
         $images = [];
 
         $error = $this->keyManager->call(function (string $apiKey) use ($query, &$images) {
@@ -75,10 +83,15 @@ class ApifyService
 
         $localFeatured = $this->downloadToServer($featured['url'] ?? null, 'featured');
         $localContent = [];
+        $usedPaths = [];
+        if ($localFeatured !== '') {
+            $usedPaths[$localFeatured] = true;
+        }
         foreach ($contentImages as $i => $image) {
             $path = $this->downloadToServer($image['url'] ?? null, 'content-' . ($i + 1));
-            if ($path) {
+            if ($path !== '' && !isset($usedPaths[$path])) {
                 $localContent[] = $path;
+                $usedPaths[$path] = true;
             }
         }
 
@@ -116,10 +129,11 @@ class ApifyService
                 continue;
             }
 
-            if (isset($seen[$url])) {
+            $normalizedUrl = $this->normalizeImageUrl($url);
+            if (isset($seen[$normalizedUrl])) {
                 continue;
             }
-            $seen[$url] = true;
+            $seen[$normalizedUrl] = true;
 
             $width = (int)($item['imageWidth'] ?? $item['width'] ?? 0);
             $height = (int)($item['imageHeight'] ?? $item['height'] ?? 0);
@@ -184,24 +198,26 @@ class ApifyService
             return [];
         }
 
-        $featuredUrl = $featured['url'] ?? null;
+        $featuredKey = !empty($featured['url']) ? $this->normalizeImageUrl($featured['url']) : null;
         $selected = [];
-        $usedHosts = [];
+        $usedKeys = [];
 
         foreach ($images as $image) {
-            if (($image['url'] ?? null) === $featuredUrl) {
+            $url = $image['url'] ?? null;
+            if (empty($url)) {
                 continue;
             }
 
-            $host = strtolower(parse_url($image['url'], PHP_URL_HOST) ?? '');
-            if ($host !== '' && isset($usedHosts[$host])) {
+            $urlKey = $this->normalizeImageUrl($url);
+            if ($featuredKey !== null && $urlKey === $featuredKey) {
+                continue;
+            }
+            if (isset($usedKeys[$urlKey])) {
                 continue;
             }
 
             $selected[] = $image;
-            if ($host !== '') {
-                $usedHosts[$host] = true;
-            }
+            $usedKeys[$urlKey] = true;
 
             if (count($selected) >= $count) {
                 break;
@@ -248,11 +264,19 @@ class ApifyService
     }
 
     /**
-     * Download ảnh từ URL về server, lưu vào public/storage/blog/.
+     * Download ảnh từ URL về server, lưu vào public/uploads/images/blog/.
+     * Mỗi URL/nội dung ảnh chỉ lưu 1 lần trong cùng một request.
      */
     private function downloadToServer(?string $url, string $prefix): string
     {
-        if (empty($url)) return '';
+        if (empty($url)) {
+            return '';
+        }
+
+        $cacheKey = $this->normalizeImageUrl($url);
+        if (isset($this->downloadCache[$cacheKey])) {
+            return $this->downloadCache[$cacheKey];
+        }
 
         try {
             $response = Http::timeout(30)
@@ -267,16 +291,48 @@ class ApifyService
                 return '';
             }
 
+            $contentHash = md5($response->body());
+            if (isset($this->contentHashCache[$contentHash])) {
+                $this->downloadCache[$cacheKey] = $this->contentHashCache[$contentHash];
+                return $this->contentHashCache[$contentHash];
+            }
+
+            $uploadPath = public_path(self::UPLOAD_DIR);
+            if (!File::exists($uploadPath)) {
+                File::makeDirectory($uploadPath, 0755, true);
+            }
+
             $extension = $this->guessExtension($url, $response->body());
-            $filename  = self::STORAGE_FOLDER . '/' . $prefix . '-' . Str::random(16) . '.' . $extension;
+            $filename  = $prefix . '-' . Str::random(16) . '.' . $extension;
+            File::put($uploadPath . '/' . $filename, $response->body());
 
-            Storage::disk('public')->put($filename, $response->body());
+            $localPath = '/' . self::UPLOAD_DIR . '/' . $filename;
+            $this->downloadCache[$cacheKey] = $localPath;
+            $this->contentHashCache[$contentHash] = $localPath;
 
-            return '/storage/' . $filename;
+            return $localPath;
         } catch (\Exception $e) {
             Log::warning("Apify download exception ({$prefix}): " . $e->getMessage() . " - {$url}");
             return '';
         }
+    }
+
+    /**
+     * Chuẩn hóa URL ảnh để so sánh trùng (bỏ scheme, www, query string).
+     */
+    private function normalizeImageUrl(string $url): string
+    {
+        $url = trim($url);
+        $parsed = parse_url($url);
+        if (!$parsed || empty($parsed['host'])) {
+            return strtolower($url);
+        }
+
+        $host = strtolower($parsed['host']);
+        $host = preg_replace('/^www\./', '', $host);
+        $path = strtolower($parsed['path'] ?? '');
+
+        return $host . $path;
     }
 
     private function guessExtension(string $url, string $content): string
