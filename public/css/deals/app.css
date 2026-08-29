@@ -670,7 +670,8 @@ footer a:hover {
     font-weight: 700;
     color: #198754;
     border-radius: 5px;
-    background-color: #fff
+    background-color: #fff;
+    cursor: pointer;
 }
 
 .coupon-filter .filter-panel .filter-item-click {

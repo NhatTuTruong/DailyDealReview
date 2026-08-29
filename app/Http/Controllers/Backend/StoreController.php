@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -188,9 +189,19 @@ class StoreController extends Controller
             abort(403, self::MESSAGE_UNAUTHORIZED);
         }
 
+        $language = App::getLocale();
+
         $request->validate([
             'name' => 'required|string',
-            'slug' => 'required|alpha_dash|unique:stores,slug,' . $store->id,
+            'slug' => [
+                'required',
+                'alpha_dash',
+                Rule::unique('stores', 'slug')
+                    ->where(fn ($query) => $query
+                        ->where('language', $language)
+                        ->whereNull('deleted_at'))
+                    ->ignore($store->id),
+            ],
             'price' => 'integer',
         ]);
 
@@ -199,7 +210,6 @@ class StoreController extends Controller
         $meta_keywords = $request->get('meta_keywords');
         $meta_description = $request->get('meta_description');
         $max_offer = $request->get('max_offer');
-        $language = App::getLocale();
         $name = $request->get('name');
         $slug = $request->get('slug');
 
@@ -294,7 +304,18 @@ class StoreController extends Controller
 
         if ($store->id) {
             $store_new = $store->replicate();
-            $store_new->name = $store->name . " copy";
+            $store_new->name = $store->name . ' copy';
+            $baseSlug = $store->slug . '-copy';
+            $slug = $baseSlug;
+            $suffix = 2;
+            while (Store::where('slug', $slug)
+                ->where('language', $store->language)
+                ->whereNull('deleted_at')
+                ->exists()) {
+                $slug = $baseSlug . '-' . $suffix;
+                $suffix++;
+            }
+            $store_new->slug = $slug;
             if ($store_new->save()) {
                 return back()->with('success', 'Sao chép thành công');
             }

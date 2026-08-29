@@ -5,30 +5,228 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <style>
-        img:is([sizes="auto" i], [sizes^="auto," i]) {
-            contain-intrinsic-size: 3000px 1500px
+    <link rel="stylesheet" href="{{ asset('vendor/slick/slick.min.css') }}?v=1.1.3" media="all"/>
+    <link rel="stylesheet" href="{{ asset('css/style.css') }}?v=1.2.1" media="all"/>
+    <link rel="preload" as="image" href="{{ asset('images/top-banner.webp') }}" fetchpriority="high">
+    @if(!empty($setting['facebook_app_id']))
+        <link rel="dns-prefetch" href="https://connect.facebook.net">
+    @endif
+    <style id="layout-critical-css">
+        .mag-post-single .mag-post-img {
+            position: relative;
+            overflow: hidden;
+            background-color: #ececec;
+        }
+
+        .mag-post-single .mag-post-img > a {
+            display: block;
+            aspect-ratio: 10 / 7;
+            line-height: 0;
+        }
+
+        .mag-post-single .mag-post-img > a img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .mag-post-single.list-design {
+            display: flex;
+            gap: 20px;
+        }
+
+        .mag-post-single.list-design .mag-post-img {
+            width: 30%;
+            flex-shrink: 0;
+        }
+
+        .mag-post-single.list-design .mag-post-img > a {
+            aspect-ratio: 1 / 1;
+        }
+
+        body.home .banner-section.banner-section-style-2 .banner-section-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            margin-inline: -10px;
+        }
+
+        body.home .banner-section.banner-section-style-2 .slider-part {
+            width: 60%;
+            padding-inline: 10px;
+        }
+
+        body.home .banner-section.banner-section-style-2 .editors-pick-part {
+            width: 40%;
+            padding-inline: 10px;
+        }
+
+        body.home .banner-section.banner-section-style-2 .editors-pick-wrapper {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 20px;
+        }
+
+        body.home .banner-grid-single {
+            min-height: 400px;
+        }
+
+        body.home .editors-pick-part .mag-post-img > a {
+            aspect-ratio: 2 / 1;
+        }
+
+        body.home .flash-img {
+            display: inline-flex;
+            width: 40px;
+            height: 40px;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        body.home .flash-img img {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+        }
+
+        body.home .banner-slider:not(.slick-initialized),
+        body.home .post-carousel:not(.slick-initialized) {
+            overflow: hidden;
+        }
+
+        body.home .banner-slider:not(.slick-initialized) > :not(:first-child),
+        body.home .post-carousel:not(.slick-initialized) > :not(:first-child) {
+            display: none;
+        }
+
+        body.home .banner-slider:not(.slick-initialized) {
+            min-height: 400px;
+        }
+
+        .mag-post-single.tile-design {
+            position: relative;
+            overflow: hidden;
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        .mag-post-single.tile-design .mag-post-img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .mag-post-single.tile-design .mag-post-img > a {
+            height: 100%;
+            aspect-ratio: unset;
+        }
+
+        .mag-post-single.tile-design .mag-post-detail {
+            position: relative;
+            z-index: 1;
+        }
+
+        body.home .main-widget-section-wrap {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            gap: 30px;
+        }
+
+        body.home .magazine-grid-section.style-1 .magazine-grid-section-wrapper,
+        body.home .magazine-tile-list-section.style-1 .magazine-tile-list-section-wrapper,
+        body.home .magazine-double-category-section .magazine-double-category-section-wrapper {
+            display: grid;
+            gap: 30px;
+        }
+
+        body.home .magazine-grid-section.style-1 .magazine-grid-section-wrapper {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        body.home .magazine-tile-list-section.style-1 .magazine-tile-list-section-wrapper {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+
+        body.home .magazine-tile-list-section.style-1 .magazine-tile-list-section-wrapper .mag-post-single {
+            grid-column: span 2;
+        }
+
+        body.home .magazine-tile-list-section.style-1 .magazine-tile-list-section-wrapper .mag-post-single:first-child {
+            grid-row: span 3;
+            grid-column: span 2;
+        }
+
+        body.home .magazine-double-category-section .magazine-double-category-section-wrapper {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        body.home .magazine-list-section.style-1 .magazine-list-section-wrapper .mag-post-single.list-design {
+            min-height: 300px;
+        }
+
+        body.home .magazine-list-section.style-1 .magazine-list-section-wrapper .mag-post-single.list-design .mag-post-img {
+            width: 50%;
+        }
+
+        @media (min-width: 992px) {
+            body.home .main-widget-section-wrap .primary-widgets-section {
+                width: calc(70% - 15px);
+            }
+
+            body.home .main-widget-section-wrap .secondary-widgets-section {
+                width: calc(30% - 15px);
+            }
+        }
+
+        @media (max-width: 991px) {
+            body.home .banner-section.banner-section-style-2 .slider-part,
+            body.home .banner-section.banner-section-style-2 .editors-pick-part {
+                width: 100%;
+            }
+
+            body.home .banner-section.banner-section-style-2 .banner-section-wrapper {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            body.home .banner-grid-single {
+                min-height: 350px;
+            }
+
+            body.home .magazine-grid-section.style-1 .magazine-grid-section-wrapper {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 767px) {
+            body.home .magazine-double-category-section .magazine-double-category-section-wrapper {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            body.home .banner-section.banner-section-style-2 .editors-pick-wrapper {
+                grid-template-columns: 1fr;
+            }
+
+            body.home .magazine-grid-section.style-1 .magazine-grid-section-wrapper,
+            body.home .magazine-tile-list-section.style-1 .magazine-tile-list-section-wrapper {
+                grid-template-columns: 1fr;
+            }
+
+            body.home .magazine-tile-list-section.style-1 .magazine-tile-list-section-wrapper .mag-post-single,
+            body.home .magazine-tile-list-section.style-1 .magazine-tile-list-section-wrapper .mag-post-single:first-child {
+                grid-column: span 1;
+                grid-row: span 1;
+            }
         }
     </style>
 
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta property="og:url" content="{{ url()->current() }}">
-    <meta property="og:title" content="{{ $setting['meta_title'] }}">
-    <meta property="og:description" content="{{ $setting['meta_description'] }}">
-    <meta property="og:type" content="website">
-    @if(!empty($setting['og_image']))
-        <meta property="og:image" content="{{ url($setting['og_image']) }}">
-    @endif
-    <meta property="og:image:type" content="image/png">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-
     {!! $setting['meta_tag'] ?? '' !!}
-
-    <link rel="icon" href="{{ url($setting['favicon'] ?? '') }}" type="image/x-icon"/>
-
-    <script>var baseUrl = "{{ url('/') }}";</script>
-    <script>var current_locale = "{{ app()->getLocale() }}";</script>
 
     <title>{{ $setting['meta_title'] }}</title>
     <meta name="keywords" content="{{ $setting['meta_keywords'] }}">
@@ -45,6 +243,12 @@
     <meta property="og:description" content="{{ $setting['meta_description'] }}"/>
     <meta property="og:url" content="{{ url()->current() }}"/>
     <meta property="og:site_name" content="{{ $setting['site_name'] }}"/>
+    @if(!empty($setting['og_image']))
+        <meta property="og:image" content="{{ url($setting['og_image']) }}">
+        <meta property="og:image:type" content="image/png">
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
+    @endif
 
     <meta name="twitter:card" content="summary_large_image"/>
     <meta name="twitter:title" content="{{ $setting['meta_title'] }}"/>
@@ -55,7 +259,8 @@
     @endif
     <meta name="twitter:description" content="{{ $setting['meta_description'] }}"/>
 
-    <link rel='stylesheet' href='{{ asset('css/block-library/style.min.css') }}?v=1.1.3' media='all'/>
+    <link rel='stylesheet' href='{{ asset('css/block-library/style.min.css') }}?v=1.1.3' media='print' onload="this.media='all'"/>
+    <noscript><link rel='stylesheet' href='{{ asset('css/block-library/style.min.css') }}?v=1.1.3'/></noscript>
 
     <style id='global-styles-inline-css'>
         :root {
@@ -382,10 +587,9 @@
             line-height: 1.6;
         }
     </style>
-    <link rel='stylesheet' href='{{ asset('vendor/slick/slick.min.css') }}?v=1.1.3' media='all'/>
-    <link rel='stylesheet' href='{{ asset('vendor/fontawesome/css/all.min.css') }}?v=1.1.3' media='all'/>
+    <link rel='stylesheet' href='{{ asset('vendor/fontawesome/css/all.min.css') }}?v=1.1.3' media='print' onload="this.media='all'"/>
+    <noscript><link rel='stylesheet' href='{{ asset('vendor/fontawesome/css/all.min.css') }}?v=1.1.3'/></noscript>
     <link rel='stylesheet' href='{{ asset('fonts/db0864cd1418c3620093312f4151b732.css') }}' media='all'/>
-    <link rel='stylesheet' href='{{ asset('css/style.css') }}?v=1.2.0' media='all'/>
     <style id='ascendoor-news-style-inline-css'>
         /* Color */
 
@@ -417,18 +621,14 @@
             font-family: "Poppins", serif;
         }
     </style>
-    <script src="{{ asset('js/jquery-3.6.0.min.js') }}?ver=1.1.3"></script>
-    <style type="text/css" id="breadcrumb-trail-css">
-        .trail-items li::after {
-            content: "/";
-        }
-    </style>
     <!-- Styles-->
     <link rel="stylesheet" type="text/css" href="{{ asset('css/custom.css') }}?v=1.1.3"/>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/ai-post.css') }}?v=1.0.0"/>
+    @stack('head')
 
+    <script>var baseUrl = "{{ url('/') }}";var current_locale = "{{ app()->getLocale() }}";</script>
 </head>
-<body class="{{ $setting['body_class'] ?? 'home page-template-default page' }} wp-embed-responsive right-sidebar modern-design">
+<body class="{{ trim($setting['body_class'] ?? '') ?: 'home page-template-default page' }} wp-embed-responsive right-sidebar modern-design">
 {!! $setting['tracking_code_body'] ?? '' !!}
 <div id="page" class="site ascendoor-site-wrapper">
 {{--    <a class="skip-link screen-reader-text" href="#primary">Skip to content</a>--}}
@@ -461,20 +661,22 @@
         gap: var(--wp--style--gallery-gap-default, var(--gallery-block--gutter-size, var(--wp--style--block-gap, 0.5em)));
     }
 </style>
-<script src="{{ asset('js/navigation.min.js') }}?v=1.1.3"></script>
-<script src="{{ asset('vendor/slick/slick.min.js') }}?ver=1.1.3"></script>
-<script src="{{ asset('js/jquery.marquee.min.js') }}?ver=1.1.3"></script>
-<script src="{{ asset('js/custom.min.js') }}?v=1.1.3"></script>
-
-<script src="{{ asset('js/global.js') }}?v=1.1.3"></script>
+<script src="{{ asset('js/jquery-3.6.0.min.js') }}?ver=1.1.3"></script>
+<script src="{{ asset('js/navigation.min.js') }}?v=1.1.3" defer></script>
+<script src="{{ asset('vendor/slick/slick.min.js') }}?ver=1.1.3" defer></script>
+<script src="{{ asset('js/jquery.marquee.min.js') }}?ver=1.1.3" defer></script>
+<script src="{{ asset('js/custom.min.js') }}?v=1.1.3" defer></script>
+<script src="{{ asset('js/global.js') }}?v=1.1.3" defer></script>
 {{--<script src="{{ asset('js/tracking.js') }}?v=1.1.3"></script>--}}
 
 @stack('bottom')
 
+@if(!empty($setting['facebook_app_id']))
 <div id="fb-root"></div>
 <script async defer crossorigin="anonymous"
-        src="https://connect.facebook.net/vi_VN/sdk.js#xfbml=1&version=v19.0&appId={{ $setting['facebook_app_id'] ?? '' }}"
+        src="https://connect.facebook.net/vi_VN/sdk.js#xfbml=1&version=v19.0&appId={{ $setting['facebook_app_id'] }}"
         nonce="uWFE6azL"></script>
+@endif
 {!! $setting['tracking_code_bottom'] ?? '' !!}
 </body>
 </html>

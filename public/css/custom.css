@@ -87,4 +87,14 @@ span.flash-title a {
   overflow: hidden;
 }
 
+.site-footer .site-footer-description {
+  margin-top: 12px;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.site-footer .site-footer-description p:last-child {
+  margin-bottom: 0;
+}
+
 /*# sourceMappingURL=custom.css.map */

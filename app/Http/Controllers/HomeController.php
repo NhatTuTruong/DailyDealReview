@@ -24,17 +24,39 @@ class HomeController extends Controller
     {
         $clsPost = new Post();
 
-        $top_tags = Post::topTags();
-        $list_latest_post = $clsPost->getListLatestPost(9);
-        $list_category_post = Category::getCategoryPostHome();
+        $cacheKey = 'home_page_data_v1_' . app()->getLocale();
+
+        $homeData = Cache::remember($cacheKey, 300, function () use ($clsPost) {
+            $top_tags = Post::topTags();
+            $list_latest_post = $clsPost->getListLatestPost(15);
+            $list_banner_post = $list_latest_post->take(5);
+            $list_editor_pick = $clsPost->getHomeEditorPick(
+                4,
+                $list_latest_post->count() > 4 ? $list_banner_post->pluck('id')->all() : []
+            );
+            $list_category_post = Category::getCategoryPostHome();
+
+            return compact(
+                'top_tags',
+                'list_latest_post',
+                'list_banner_post',
+                'list_editor_pick',
+                'list_category_post',
+            );
+        });
+
+        extract($homeData);
 
         $setting = Setting::getAllSetting();
+        $setting['body_class'] = 'home page-template-default page';
 
         return view('frontend.home.index',
             compact(
                 'setting',
                 'top_tags',
                 'list_latest_post',
+                'list_banner_post',
+                'list_editor_pick',
                 'list_category_post',
             )
         );

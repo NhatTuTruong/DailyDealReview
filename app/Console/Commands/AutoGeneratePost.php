@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\Post;
 use App\Models\Setting;
 use App\Models\Store;
+use App\Models\Category;
 use App\Services\AI\PostGeneratorService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -52,6 +53,8 @@ class AutoGeneratePost extends Command
         try {
             $data = $service->generateFromStore($store->id);
 
+            $postCategoryId = Category::getPostCategoryIdFromStoreCategory($store->cat_id ?? 0);
+
             $post = new Post();
             $post->fill($data);
             $post->slug = $this->makeUniqueSlug($data['slug'] ?? 'post-' . time());
@@ -60,10 +63,15 @@ class AutoGeneratePost extends Command
             $post->priority = 9999;
             $post->view_num = 0;
             $post->language = app()->getLocale();
+
+            if ($postCategoryId) {
+                $post->cat_id = $postCategoryId;
+            }
+
             $post->save();
 
-            if (!empty($data['cat_id'])) {
-                $post->categories()->sync([(int) $data['cat_id']]);
+            if ($postCategoryId) {
+                $post->categories()->sync([$postCategoryId]);
             }
 
             Cache::put($cacheKey, now()->toDateTimeString(), now()->addDays(30));

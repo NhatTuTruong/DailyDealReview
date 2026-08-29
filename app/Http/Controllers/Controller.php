@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Page;
 use App\Models\Post;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\View;
 use App\Models\Setting;
 use App\Models\Menu;
@@ -19,32 +19,47 @@ abstract class Controller
 
     public function __construct()
     {
-        $clsPost = new Post();
         View::share('selectedMainMenu', $this->selectedMainMenu);
         $current_locale = App::getLocale() == config('app.fallback_locale') ? '' : App::getLocale();
+        View::share('current_locale', $current_locale);
 
-        $list_most_view_post = $clsPost->getListMostViewPost(6);
-        $banner_posts = $clsPost->getListLatestPost(3);
+        if ($this->shouldShareFrontendData()) {
+            $this->shareFrontendData();
+        }
+    }
 
-        //Code dự án
-        $setting = Setting::getAllSetting();
-        $top_menu = Menu::getAllMenuLink('top');
-        $main_menu = Menu::getAllMenuLink();
-        $footer_menu = Menu::getAllMenuLink('footer');
+    protected function shouldShareFrontendData(): bool
+    {
+        $request = request();
+        if (!$request) {
+            return false;
+        }
 
-        $share = [
-            'top_menu' => $top_menu,
-            'main_menu' => $main_menu,
-            'footer_menu' => $footer_menu,
-            'list_most_view_post' => $list_most_view_post,
-            'banner_posts' => $banner_posts,
-        ];
+        $adminPrefix = trim((string) config('cms.prefix_admin', 'backend'), '/');
+
+        return !$request->is($adminPrefix, $adminPrefix . '/*');
+    }
+
+    protected function shareFrontendData(): void
+    {
+        $locale = App::getLocale();
+        $cacheKey = 'frontend_share_v1_' . $locale;
+
+        $share = Cache::remember($cacheKey, 300, function () {
+            $clsPost = new Post();
+
+            return [
+                'top_menu' => Menu::getAllMenuLink('top'),
+                'main_menu' => Menu::getAllMenuLink(),
+                'footer_menu' => Menu::getAllMenuLink('footer'),
+                'list_most_view_post' => $clsPost->getListMostViewPost(6),
+                'list_hot_post_gallery' => $clsPost->getListPostHotWithImage(6),
+                'banner_posts' => $clsPost->getListLatestPost(3),
+            ];
+        });
 
         View::share('share', $share);
-        View::share('setting', $setting);
-        View::share('current_locale', $current_locale);
-        //End code dự án
-
+        View::share('setting', Setting::getAllSetting());
     }
 
     protected function selectedSubMenu($menuId): void

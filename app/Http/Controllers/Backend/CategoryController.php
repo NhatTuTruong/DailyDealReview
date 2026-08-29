@@ -35,10 +35,10 @@ class CategoryController extends Controller
         $this->selectedSubMenu('category');
 
         $category_type = $request->get('type', '');
-        if ($category_type !== '') {
-            session(['category_type' => $category_type]);
+        if ($category_type !== '' && $category_type !== null) {
+            session(['category_type' => (int) $category_type]);
         }
-        $type = session('category_type', Category::CATEGORY_TYPE_POST);
+        $type = session('category_type', Category::CATEGORY_TYPE_STORE);
         $filter['name'] = $request->get('name', '');
 
         $query = $this->category->where('language', App::getLocale())->orderBy('name');
@@ -48,6 +48,19 @@ class CategoryController extends Controller
 
         $query->where('type', $type);
         $categories = $this->category->showCategories($query->get());
+
+        if ($categories->isEmpty()
+            && $type === Category::CATEGORY_TYPE_POST
+            && !$request->filled('name')
+            && !$request->has('type')
+            && Category::where('language', App::getLocale())
+                ->where('type', Category::CATEGORY_TYPE_STORE)
+                ->exists()
+        ) {
+            session(['category_type' => Category::CATEGORY_TYPE_STORE]);
+            return redirect()->route('backend_category');
+        }
+
         $option_category_types = Util::makeHTMLOptions($this->category_types, $type);
 
         $option_column_button = Category::makeOptionColumnButton();
@@ -93,7 +106,7 @@ class CategoryController extends Controller
             abort(403, self::MESSAGE_UNAUTHORIZED);
         }
 
-        $type = session('category_type', Category::CATEGORY_TYPE_POST);
+        $type = session('category_type', Category::CATEGORY_TYPE_STORE);
         $list_category = Category::makeListCategory(0, $type, $category->parent_id, true);
         return view('backend.category.create', compact('category', 'list_category', 'type'));
     }
@@ -132,7 +145,7 @@ class CategoryController extends Controller
         $category->meta_description = strip_tags($request->get('meta_description'));
 
         if (!$category->exists) {
-            $category->type = session('category_type', Category::CATEGORY_TYPE_POST);;
+            $category->type = session('category_type', Category::CATEGORY_TYPE_STORE);
             $category->language = App::getLocale();;
         }
 

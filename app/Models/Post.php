@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Libs\Util;
+use App\Libs\FrontendCache;
 use App\Traits\HasGlobalScopes;
 use App\Traits\HasImageCleanup;
 use Illuminate\Database\Eloquent\Collection;
@@ -63,7 +64,12 @@ class Post extends Model
         });
 
         static::saved(function ($post) {
+            FrontendCache::flush();
 //            Slug::insertOrUpdateSlug($post->slug, Slug::MODULE['POST'], $post->id);
+        });
+
+        static::deleted(function () {
+            FrontendCache::flush();
         });
     }
 
@@ -234,6 +240,22 @@ class Post extends Model
             ->get();
     }
 
+    public function getListPostHotWithImage($limit = 6)
+    {
+        $language = App::getLocale();
+
+        return Post::select($this->getSimpleField())
+            ->where('language', $language)
+            ->active()
+            ->where('is_hot', 1)
+            ->whereNotNull('image')
+            ->where('image', '<>', '')
+            ->orderByDesc('view_num')
+            ->orderByDesc('id')
+            ->limit($limit)
+            ->get();
+    }
+
     public function getListLatestPost($limit = 5)
     {
         return Post::with('categories')
@@ -244,6 +266,54 @@ class Post extends Model
             ->orderBy('priority', 'desc')
             ->orderBy('id', 'desc')
             ->get();
+    }
+
+    public function getHomeEditorPick(int $limit = 4, array $excludeIds = [])
+    {
+        $pickPosts = Post::with('categories')
+            ->select($this->getSimpleField())
+            ->language()
+            ->active()
+            ->when(!empty($excludeIds), fn ($q) => $q->whereNotIn('id', $excludeIds))
+            ->where('is_hot', 1)
+            ->orderByDesc('priority')
+            ->orderByDesc('id')
+            ->limit($limit)
+            ->get();
+
+        if ($pickPosts->count() < $limit) {
+            $usedIds = array_merge($excludeIds, $pickPosts->pluck('id')->all());
+
+            $latestPosts = Post::with('categories')
+                ->select($this->getSimpleField())
+                ->language()
+                ->active()
+                ->when(!empty($usedIds), fn ($q) => $q->whereNotIn('id', $usedIds))
+                ->orderByDesc('priority')
+                ->orderByDesc('id')
+                ->limit($limit - $pickPosts->count())
+                ->get();
+
+            $pickPosts = $pickPosts->concat($latestPosts);
+        }
+
+        if ($pickPosts->count() < $limit) {
+            $usedIds = $pickPosts->pluck('id')->all();
+
+            $fallbackPosts = Post::with('categories')
+                ->select($this->getSimpleField())
+                ->language()
+                ->active()
+                ->when(!empty($usedIds), fn ($q) => $q->whereNotIn('id', $usedIds))
+                ->orderByDesc('priority')
+                ->orderByDesc('id')
+                ->limit($limit - $pickPosts->count())
+                ->get();
+
+            $pickPosts = $pickPosts->concat($fallbackPosts);
+        }
+
+        return $pickPosts->unique('id')->take($limit)->values();
     }
 
     public function getListMostViewPost($limit = 5)

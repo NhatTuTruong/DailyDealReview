@@ -1,9 +1,9 @@
-@props(['name', 'placeholder', 'value', 'label', 'messages', 'options', 'required', 'help'])
+@props(['name', 'placeholder', 'value', 'label', 'messages', 'options', 'required', 'help', 'id'])
 
 <div class="form-group row">
     <label class="col-sm-3 col-form-label @if($required ?? false)required @endif">{{ $label }}</label>
     <div class="col-sm-9">
-        <select class="form-control" aria-label="{{ $label }}" name="{{ $name }}" id="{{ $name }}" {{ $attributes }}>
+        <select class="form-control" aria-label="{{ $label }}" name="{{ $name }}" id="{{ $id ?? $name }}" {{ $attributes }}>
             {{$options}}
         </select>
         @if ($messages)

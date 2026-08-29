@@ -883,7 +883,7 @@ ul.social-links a {
     height: 20px;
     opacity: 0.8;
     display: flex;
-    font-size: var(--font-size-sm);
+    font-size: 18px;
     overflow: hidden;
     position: relative;
     align-items: center;
@@ -891,6 +891,14 @@ ul.social-links a {
     justify-content: center;
     transition: all 0.3s ease;
     color: var(--white);
+}
+
+ul.social-links a i {
+    line-height: 1;
+}
+
+ul.social-links a::before {
+    content: none;
 }
 
 .author-social-contacts a::before,
@@ -6356,18 +6364,31 @@ body.rtl .flash-news-ticker .flash-news-ticker-wrapper .flash-news-part .mag-pos
     opacity: 1;
     margin-inline-end: 5px;
     margin-block-end: 5px;
+    width: auto;
+    height: auto;
+    font-size: 18px;
+}
+
+.widget_ascendoor_news_social_icons ul.social-links li a i {
+    display: inline-block;
+    line-height: 1;
+}
+
+.widget_ascendoor_news_social_icons ul.social-links li a::before {
+    content: none;
 }
 
 .widget_ascendoor_news_social_icons ul.social-links li a .screen-reader-text {
-    clip: unset;
-    clip-path: unset;
-    height: auto;
-    width: auto;
-    margin: 0;
-    position: relative !important;
-    overflow: visible;
-    color: #fff;
-    top: inherit;
+    border: 0;
+    clip: rect(1px, 1px, 1px, 1px);
+    clip-path: inset(50%);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute !important;
+    width: 1px;
+    word-wrap: normal !important;
 }
 
 .widget_ascendoor_news_social_icons ul.social-links li a:focus,
@@ -6644,6 +6665,20 @@ body.rtl .flash-news-ticker .flash-news-ticker-wrapper .flash-news-part .mag-pos
     text-decoration: none;
     color: var(--footer-heading-color);
     transition: all 0.3s ease;
+}
+
+.site-footer .wp-block-gallery.has-nested-images figure.wp-block-image > a {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.site-footer .wp-block-gallery.has-nested-images figure.wp-block-image img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
 }
 
 .site-footer .site-footer-bottom .site-footer-bottom-wrapper .site-info a:focus,

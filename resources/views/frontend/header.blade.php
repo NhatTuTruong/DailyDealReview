@@ -36,27 +36,17 @@
                                 </svg>
                             </a>
                         </div>
+                        @if(!empty(\App\Models\Setting::getSocialLinks($setting)))
                         <div class="social-icons">
                             <div class="menu-social-menu-container">
-                                <ul id="menu-social-menu" class="menu social-links">
-                                    <li class="menu-item menu-item-type-custom menu-item-object-custom">
-                                        <a href="{{ $setting['instagram'] }}" target="_blank">
-                                            <span class="screen-reader-text">Instagram</span>
-                                        </a>
-                                    </li>
-                                    <li class="menu-item menu-item-type-custom menu-item-object-custom">
-                                        <a href="{{ $setting['youtube'] }}" target="_blank">
-                                            <span class="screen-reader-text">YouTube</span>
-                                        </a>
-                                    </li>
-                                    <li class="menu-item menu-item-type-custom menu-item-object-custom">
-                                        <a href="{{ $setting['facebook'] }}" target="_blank">
-                                            <span class="screen-reader-text">Facebook</span>
-                                        </a>
-                                    </li>
-                                </ul>
+                                @include('frontend.blocks.social-links', [
+                                    'setting' => $setting,
+                                    'listClass' => 'menu social-links',
+                                    'listId' => 'menu-social-menu',
+                                ])
                             </div>
                         </div>
+                        @endif
                     </div>
                 </div>
             </div>

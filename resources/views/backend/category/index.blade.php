@@ -26,7 +26,7 @@
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <select class="form-control" name="type" onchange="this.form.submit()">
-                                        <option value="0">Loại danh mục</option>
+                                        <option value="">Tất cả loại</option>
                                         {!! $option_category_types !!}
                                     </select>
                                 </div>

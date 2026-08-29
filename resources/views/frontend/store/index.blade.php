@@ -232,7 +232,15 @@
                     </div>
                     <div class="people-also-ask-container">
                         <h2 class="people-also-ask-title">{{ $store->name }} Questions &amp; Answers</h2>
-                        {!! $store->faqs !!}
+                        <table>
+                            <tbody>
+                            <tr>
+                                <td>
+                                    {!! $store->faqs !!}
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -283,12 +291,6 @@
                         @endif
                         <a class="brand-more" href="{{ $store->getUrl() }}">More {{ $store->name }} &gt;&gt;</a>
                     </div>
-                    <div class="key-pc-footer">
-                        <div class="key-text">
-                            <img src="{{ $setting['logo'] }}" alt="{{ $setting['site_name'] }}"
-                                 style="height: 32px;">
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -296,9 +298,39 @@
 
 @endsection
 
+@push('head')
+    <link rel="stylesheet" href="{{ asset('css/deals/bootstrap.min.css') }}?v=1.1.3"/>
+    <link rel="stylesheet" href="{{ asset('css/deals/app.css') }}?v=1.1.3"/>
+    <style>
+        .container-codes .bi .bp,
+        .container-codes .container-popular-brand .brand-coupon-info {
+            background-color: #fff;
+        }
+
+        .container-codes .row {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .container-codes .bi {
+            width: 100%;
+        }
+
+        @media (min-width: 992px) {
+            .container-codes .bi {
+                flex: 0 0 25%;
+                max-width: 25%;
+            }
+
+            .container-codes .cl {
+                flex: 0 0 75%;
+                max-width: 75%;
+            }
+        }
+    </style>
+@endpush
+
 @push('bottom')
-    <link rel='stylesheet' href='{{ asset('css/deals/bootstrap.min.css') }}?v=1.1.3' media='all'/>
-    <link rel='stylesheet' href='{{ asset('css/deals/app.css') }}?v=1.1.3' media='all'/>
     <script src="{{ asset('js/bootstrap.bundle.min.js') }}?v=1.1.1"></script>
     <script>
         window.appHelper = {

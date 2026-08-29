@@ -1,74 +1,304 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# WebCouponNew
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Website coupon/deals xây dựng trên **Laravel 12** + **PHP 8.2+**, gồm frontend tin tức/store và admin CMS (`/backend`).
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Yêu cầu hosting
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+| Thành phần | Phiên bản tối thiểu |
+|---|---|
+| PHP | 8.2+ |
+| Composer | 2.x |
+| MySQL / MariaDB | 5.7+ / 10.3+ |
+| Web server | Apache (mod_rewrite) hoặc Nginx |
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+**PHP extensions bắt buộc:**
 
-## Learning Laravel
+- `bcmath`, `ctype`, `curl`, `dom`, `fileinfo`, `json`, `mbstring`, `openssl`, `pdo`, `pdo_mysql`, `tokenizer`, `xml`, `zip`
+- `gd` (bắt buộc nếu dùng tạo bài viết AI — chuyển ảnh sang WebP)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+**Khuyến nghị production:**
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+- `redis` hoặc bật cache/session qua database (mặc định project dùng `database`)
+- SSL/HTTPS
+- Cron job cho Laravel Scheduler
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-## Laravel Sponsors
+## Cấu trúc trên hosting
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Document root **phải trỏ vào thư mục `public/`**, không trỏ vào root project.
 
-### Premium Partners
+```
+/home/user/webcoupon/          ← root mã nguồn
+├── app/
+├── bootstrap/
+├── config/
+├── database/
+├── public/                    ← document root của domain
+│   ├── index.php
+│   ├── uploads/               ← ảnh upload (cần ghi)
+│   └── ...
+├── storage/                   ← cần ghi
+├── vendor/
+├── .env
+└── artisan
+```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+Admin: `https://your-domain.com/backend`
 
-## Contributing
+---
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Deploy lần đầu
 
-## Code of Conduct
+### 1. Upload mã nguồn
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Upload toàn bộ project lên server (Git clone hoặc FTP), **trừ** `vendor/` nếu sẽ cài bằng Composer trên server.
 
-## Security Vulnerabilities
+### 2. Cài dependency PHP
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+cd /path/to/webcoupon
+
+composer install --no-dev --optimize-autoloader
+```
+
+### 3. Tạo file `.env`
+
+```bash
+cp .env.example .env   # nếu có file mẫu
+# hoặc tạo .env thủ công
+php artisan key:generate
+```
+
+Cấu hình tối thiểu trong `.env`:
+
+```env
+APP_NAME=WebCoupon
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://your-domain.com
+APP_TIMEZONE=Asia/Ho_Chi_Minh
+
+SITE_NAME=DealHunter365
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=your_database
+DB_USERNAME=your_user
+DB_PASSWORD=your_password
+
+CACHE_STORE=database
+SESSION_DRIVER=database
+QUEUE_CONNECTION=database
+
+PREFIX_ADMIN=backend
+
+CKFINDER_LICENSE_NAME=your-domain.com
+CKFINDER_LICENSE_KEY=your-ckfinder-key
+```
+
+> API Gemini / Apify cấu hình trong admin: **Cài đặt → Cấu hình AI** (lưu trong bảng `settings`, không cần ghi vào `.env`).
+
+### 4. Tạo database & chạy migration
+
+```bash
+php artisan migrate --force
+```
+
+### 5. Seed dữ liệu ban đầu (tuỳ chọn)
+
+```bash
+# Settings + danh mục mặc định
+php artisan db:seed --force
+
+# Chỉ seed settings
+php artisan db:seed --class=SettingsSeeder --force
+
+# Chỉ seed danh mục
+php artisan db:seed --class=CategoriesSeeder --force
+```
+
+### 6. Liên kết storage & phân quyền
+
+```bash
+php artisan storage:link
+
+chmod -R 775 storage bootstrap/cache
+chmod -R 775 public/uploads
+chown -R www-data:www-data storage bootstrap/cache public/uploads
+```
+
+> Trên cPanel/shared hosting: đặt quyền ghi cho `storage/`, `bootstrap/cache/`, `public/uploads/` qua File Manager.
+
+### 7. Cache cấu hình production
+
+```bash
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+php artisan event:cache
+php artisan optimize
+```
+
+### 8. Cấu hình Cron (bắt buộc nếu dùng AI auto-post)
+
+Thêm cron trên hosting (chạy mỗi phút):
+
+```cron
+* * * * * cd /path/to/webcoupon && php artisan schedule:run >> /dev/null 2>&1
+```
+
+Scheduler đang chạy:
+
+- `post:auto-generate` — tạo bài viết AI tự động (mỗi phút, tuỳ cấu hình admin)
+- `store:capture-view-snapshot` — snapshot lượt xem store (23:55 hàng ngày)
+
+**Lưu ý:** Không dùng `php artisan schedule:work` trên shared hosting. Chỉ dùng cron như trên.
+
+---
+
+## Deploy cập nhật (mỗi lần release)
+
+```bash
+cd /path/to/webcoupon
+
+git pull origin main          # hoặc upload file mới
+
+composer install --no-dev --optimize-autoloader
+
+php artisan migrate --force
+
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+php artisan optimize
+
+# Xóa cache frontend sau deploy lớn (tuỳ chọn)
+php artisan cache:clear
+```
+
+---
+
+## Lệnh Artisan thường dùng
+
+### Import store / offer
+
+```bash
+# Tạo lại file Excel mẫu import store
+php artisan import:sample-store
+```
+
+Nếu danh mục trong Excel không khớp DB → chạy lại:
+
+```bash
+php artisan db:seed --class=CategoriesSeeder --force
+php artisan import:sample-store
+```
+
+Sau đó tải file mẫu mới tại admin (dropdown danh mục sẽ đúng).
+
+### AI tạo bài viết
+
+```bash
+# Tạo bài tự động ngay (bỏ qua interval)
+php artisan post:auto-generate --force
+```
+
+Bật/tắt và interval cấu hình tại admin: **Cài đặt → Cấu hình AI**.
+
+### Cache
+
+```bash
+php artisan cache:clear
+php artisan config:clear
+php artisan route:clear
+php artisan view:clear
+php artisan optimize:clear
+```
+
+### Kiểm tra hệ thống
+
+```bash
+php artisan about
+php -m                          # liệt kê PHP extensions
+php -r "echo function_exists('imagewebp') ? 'WebP OK' : 'WebP MISSING';"
+```
+
+---
+
+## Build frontend (tuỳ chọn)
+
+Frontend chính dùng asset tĩnh trong `public/css`, `public/js` — **không bắt buộc** chạy npm khi deploy.
+
+Chỉ cần build Vite nếu bạn chỉnh layout auth (`resources/views/layouts/`):
+
+```bash
+npm ci
+npm run build
+```
+
+---
+
+## Checklist sau deploy
+
+- [ ] Trang chủ load bình thường: `https://your-domain.com`
+- [ ] Admin đăng nhập được: `https://your-domain.com/backend`
+- [ ] Upload ảnh trong admin hoạt động (`public/uploads/` ghi được)
+- [ ] CKFinder mở được (license đúng trong `.env`)
+- [ ] Cron `schedule:run` đã cấu hình (nếu dùng AI auto-post)
+- [ ] `APP_DEBUG=false` trên production
+- [ ] HTTPS bật, `APP_URL` đúng domain
+
+---
+
+## Xử lý lỗi thường gặp
+
+### 500 Internal Server Error
+
+```bash
+tail -f storage/logs/laravel.log
+php artisan config:clear
+php artisan cache:clear
+```
+
+Kiểm tra quyền ghi `storage/`, `bootstrap/cache/`.
+
+### 404 mọi route (trừ trang chủ)
+
+- Apache: bật `mod_rewrite`, document root trỏ `public/`
+- Kiểm tra file `public/.htaccess` tồn tại
+
+### Import store lỗi 500 / cat_id = 0
+
+```bash
+php artisan db:seed --class=CategoriesSeeder --force
+php artisan import:sample-store
+```
+
+### Icon / CSS không load
+
+Hard refresh (`Ctrl+F5`). Kiểm tra `public/vendor/fontawesome/` và `public/css/` đã upload đủ.
+
+### Ảnh AI không chuyển WebP
+
+Hosting cần PHP extension **GD** có hỗ trợ WebP:
+
+```bash
+php -r "echo function_exists('imagewebp') ? 'OK' : 'Missing';"
+```
+
+---
+
+## Tham khảo
+
+- Demo giao diện tham khảo: https://demos.ascendoor.com/ascendoor-news/contact-us/
+- Laravel docs: https://laravel.com/docs
+
+---
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-
-https://demos.ascendoor.com/ascendoor-news/contact-us/
-
-Chạy php artisan schedule:work (hoặc cấu hình cron: * * * * * php /path/artisan schedule:run >> /dev/null 2>&1)
-
- Command để tạo lại file mẫu:
-
-php artisan import:sample-store
+MIT (Laravel framework)

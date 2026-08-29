@@ -31,7 +31,7 @@
                     </div>
                     <div class="flash-news-part" dir="ltr">
                         <div class="marquee flash-news-slide" data-speed="250">
-                            @foreach($list_latest_post as $latest_post)
+                            @foreach($list_latest_post->take(9) as $latest_post)
                                 <div class="mag-post-title-wrapper">
                                     <div class="mag-post-title-wrap">
                                         <span class="flash-img">
@@ -39,7 +39,7 @@
                                                  src="{{ $latest_post->image }}"
                                                  class="attachment-40x40 size-40x40 wp-post-image"
                                                  alt="{{ $latest_post->name }}"
-                                                 decoding="async"/> <span class="flash-number">{{ $loop->index + 1 }}</span>
+                                                 decoding="async" loading="lazy"/> <span class="flash-number">{{ $loop->index + 1 }}</span>
                                         </span>
                                         <span class="flash-title">
                                             <a href="{{ $latest_post->getUrl() }}">{{ $latest_post->name }}</a></span>
@@ -57,15 +57,14 @@
                 <div class="banner-section-wrapper">
                     <div class="slider-part">
                         <div class="banner-slider magazine-carousel-slider-navigation">
-                            @foreach($list_latest_post as $latest_post)
-                                @if($loop->index < 5)
-                                    <div class="mag-post-single banner-grid-single has-image tile-design">
+                            @foreach($list_banner_post as $latest_post)
+                                <div class="mag-post-single banner-grid-single has-image tile-design">
                                         <div class="mag-post-img">
                                             <a href="{{ $latest_post->getUrl() }}">
                                                 <img width="1280" height="853"
                                                      src="{{ $latest_post->image }}"
                                                      class="attachment-full size-full wp-post-image"
-                                                     alt="{{ $latest_post->name }}" decoding="async"
+                                                     alt="{{ $latest_post->name }}" decoding="async" loading="eager"
                                                      fetchpriority="high"/>
                                             </a>
                                         </div>
@@ -82,7 +81,6 @@
                                             @include('frontend.post.post_meta', ['post' => $latest_post])
                                         </div>
                                     </div>
-                                @endif
                             @endforeach
                         </div>
                     </div>
@@ -91,15 +89,14 @@
                             <h3 class="section-title">Editor Pick</h3>
                         </div>
                         <div class="editors-pick-wrapper">
-                            @foreach($list_latest_post as $latest_post)
-                                @if($loop->index > 4 && $loop->index < 9)
-                                    <div class="mag-post-single banner-gird-single has-image">
+                            @foreach($list_editor_pick as $latest_post)
+                                <div class="mag-post-single banner-gird-single has-image">
                                         <div class="mag-post-img">
                                             <a href="{{ $latest_post->getUrl() }}">
                                                 <img width="1280" height="772"
                                                      src="{{ $latest_post->image }}"
                                                      class="attachment-post-thumbnail size-post-thumbnail wp-post-image"
-                                                     alt="{{ $latest_post->name }}" decoding="async"/>
+                                                     alt="{{ $latest_post->name }}" decoding="async" loading="lazy"/>
                                             </a>
                                         </div>
                                         <div class="mag-post-detail">
@@ -115,7 +112,6 @@
                                             @include('frontend.post.post_meta', ['post' => $latest_post])
                                         </div>
                                     </div>
-                                @endif
                             @endforeach
                         </div>
                     </div>
@@ -125,7 +121,7 @@
 
         <div class="below-banner-widgets-section ascendoor-widget-area">
             <div class="ascendoor-wrapper">
-                @if($list_category_post->has(0))
+                @if($list_category_post->has(0) && $list_category_post->get(0)->posts->isNotEmpty())
                     @php($category_post_0 = $list_category_post->get(0))
                     <section id="ascendoor_news_posts_carousel_widget-3"
                              class="widget ascendoor-widget magazine-post-carousel-section">
@@ -144,7 +140,7 @@
                                                      src="{{ $post_cat1->image }}"
                                                      class="attachment-post-thumbnail size-post-thumbnail wp-post-image"
                                                      alt="{{ $post_cat1->name }}"
-                                                     decoding="async"/>
+                                                     decoding="async" loading="lazy"/>
                                             </a>
                                         </div>
                                         <div class="mag-post-detail">
@@ -179,7 +175,7 @@
                         </div>
                     </section>
                 @endif
-                @if($list_category_post->has(1))
+                @if($list_category_post->has(1) && $list_category_post->get(1)->posts->isNotEmpty())
                     @php($category_post_1 = $list_category_post->get(1))
                     <section id="ascendoor_news_magazine_tile_list_widget-3"
                              class="widget ascendoor-widget magazine-tile-list-section style-1">
@@ -199,7 +195,7 @@
                                                      src="{{ $post_cat1_first->image }}"
                                                      class="attachment-post-thumbnail size-post-thumbnail wp-post-image"
                                                      alt="{{ $post_cat1_first->name }}"
-                                                     decoding="async"/>
+                                                     decoding="async" loading="lazy"/>
                                             </a>
                                         </div>
                                         <div class="mag-post-detail">
@@ -228,7 +224,7 @@
                                                          src="{{ $post_cat1->image }}"
                                                          class="attachment-post-thumbnail size-post-thumbnail wp-post-image"
                                                          alt="{{ $post_cat1->name }}"
-                                                         decoding="async"/> </a>
+                                                         decoding="async" loading="lazy"/> </a>
                                             </div>
                                             <div class="mag-post-detail">
                                                 <div class="mag-post-category ">
@@ -255,7 +251,7 @@
             <div class="ascendoor-wrapper">
                 <div class="main-widget-section-wrap frontpage-right-sidebar ">
                     <div class="primary-widgets-section ascendoor-widget-area">
-                        @if($list_category_post->has(2))
+                        @if($list_category_post->has(2) && $list_category_post->get(2)->posts->isNotEmpty())
                             @php($category_post_2 = $list_category_post->get(2))
                             <section id="ascendoor_news_magazine_grid_widget-3"
                                      class="widget ascendoor-widget magazine-grid-section style-1">
@@ -274,7 +270,7 @@
                                                             <img width="1279" height="854"
                                                                  src="{{ $post_cat2->image }}"
                                                                  class="attachment-post-thumbnail size-post-thumbnail wp-post-image"
-                                                                 alt="{{ $post_cat2->name }}" decoding="async"/> </a>
+                                                                 alt="{{ $post_cat2->name }}" decoding="async" loading="lazy"/> </a>
                                                     </div>
                                                     <div class="mag-post-detail">
                                                         <div class="mag-post-category">
@@ -295,7 +291,7 @@
                                 </div>
                             </section>
                         @endif
-                        @if($list_category_post->has(3))
+                        @if($list_category_post->has(3) && $list_category_post->get(3)->posts->isNotEmpty())
                             @php($category_post_3 = $list_category_post->get(3))
                             <section id="ascendoor_news_magazine_list_widget-3"
                                      class="widget ascendoor-widget magazine-list-section style-1">
@@ -314,7 +310,7 @@
                                                             <img width="1280" height="772"
                                                                  src="{{ $post_cat3->image }}"
                                                                  class="attachment-post-thumbnail size-post-thumbnail wp-post-image"
-                                                                 alt="{{ $post_cat3->name }}" decoding="async"/>
+                                                                 alt="{{ $post_cat3->name }}" decoding="async" loading="lazy"/>
                                                         </a>
                                                     </div>
                                                     <div class="mag-post-detail">
@@ -340,18 +336,18 @@
                             </section>
                         @endif
 
+                        @php($double_category_posts = $list_category_post->slice(4, 2)->filter(fn ($category) => $category->posts->isNotEmpty()))
+                        @if($double_category_posts->isNotEmpty())
                         <section id="ascendoor_news_magazine_double_category_widget-3"
                                  class="widget ascendoor-widget magazine-double-category-section style-1">
                             <div class="magazine-section-body">
                                 <div class="magazine-double-category-section-wrapper">
-                                    @foreach($list_category_post as $category_post)
-                                        @if($loop->index > 3 && $loop->index < 6)
+                                    @foreach($double_category_posts as $category_post)
                                             <div class="magazine-category-single">
                                                 <div class="section-header">
                                                     <h3 class="section-title">{{ $category_post->name }}</h3>
                                                 </div>
-                                                @if($category_post->posts->isNotEmpty())
-                                                    @php($first_post_in_cat = $category_post->posts->first())
+                                                @php($first_post_in_cat = $category_post->posts->first())
                                                     <div class="mag-post-single has-image tile-design">
                                                         <div class="mag-post-img">
                                                             <a href="{{ $first_post_in_cat->getUrl() }}">
@@ -359,7 +355,7 @@
                                                                      src="{{ $first_post_in_cat->image }}"
                                                                      class="attachment-post-thumbnail size-post-thumbnail wp-post-image"
                                                                      alt="{{ $first_post_in_cat->name }}"
-                                                                     decoding="async"/>
+                                                                     decoding="async" loading="lazy"/>
                                                             </a>
                                                         </div>
                                                         <div class="mag-post-detail">
@@ -383,7 +379,7 @@
                                                                         <img width="1152" height="768"
                                                                              src="{{ $post->image }}"
                                                                              class="attachment-post-thumbnail size-post-thumbnail wp-post-image"
-                                                                             alt="{{ $post->name }}" decoding="async"/>
+                                                                             alt="{{ $post->name }}" decoding="async" loading="lazy"/>
                                                                     </a>
                                                                 </div>
                                                                 <div class="mag-post-detail">
@@ -401,16 +397,15 @@
                                                             </div>
                                                         @endif
                                                     @endforeach
-                                                @endif
                                             </div>
-                                        @endif
                                     @endforeach
                                 </div>
                             </div>
                         </section>
+                        @endif
                     </div>
                     <div class="secondary-widgets-section ascendoor-widget-area">
-                        @if($list_category_post->has(6))
+                        @if($list_category_post->has(6) && $list_category_post->get(6)->posts->isNotEmpty())
                             @php($category_post_6 = $list_category_post->get(6))
                             <section id="ascendoor_news_magazine_small_list_widget-3"
                                      class="widget ascendoor-widget magazine-small-list-section style-1">
@@ -430,7 +425,7 @@
                                                             <img width="1280" height="853"
                                                                  src="{{ $post_cat6->image }}"
                                                                  class="attachment-post-thumbnail size-post-thumbnail wp-post-image"
-                                                                 alt="{{ $post_cat6->name }}" decoding="async"/> </a>
+                                                                 alt="{{ $post_cat6->name }}" decoding="async" loading="lazy"/> </a>
                                                     </div>
                                                     <div class="mag-post-detail">
                                                         <div class="mag-post-detail-inner">
@@ -453,28 +448,29 @@
                                 </div>
                             </section>
                         @endif
+                        @php($sidebar_category_posts = $list_category_post->slice(7, 4)->filter(fn ($category) => $category->posts->isNotEmpty()))
+                        @if($sidebar_category_posts->isNotEmpty())
                         <section id="ascendoor_news_magazine_category_widget-3"
                                  class="widget ascendoor-widget magazine-category-section">
                             <div class="section-header">
                                 <h3 class="section-title">Categories</h3>
                             </div>
                             <div class="magazine-category-wrapper">
-                                @foreach($list_category_post as $category_post)
-                                    @if($loop->index > 6 && $loop->index < 11)
+                                @foreach($sidebar_category_posts as $category_post)
                                         <div class="category-single">
                                             <img src="{{ $category_post->image ?: asset('images/category_image.webp') }}">
                                             <a href="{{ $category_post->getUrl() }}">
                                                 {{ $category_post->name }} <span class="category-dots"></span>
                                                 <span class="category-no">
-                                                    {{ $loop->index - 6 }}
+                                                    {{ $loop->iteration }}
                                                     <span class="posts">Posts</span>
                                                 </span>
                                             </a>
                                         </div>
-                                    @endif
                                 @endforeach
                             </div>
                         </section>
+                        @endif
                         <section id="ascendoor_news_magazine_trending_posts_widget-3"
                                  class="widget ascendoor-widget magazine-trending-carousel-section">
                             <div class="section-header">
@@ -491,7 +487,7 @@
                                                     <img width="1280" height="853"
                                                          src="{{ $most_view_post->image }}"
                                                          class="attachment-post-thumbnail size-post-thumbnail wp-post-image"
-                                                         alt="{{ $most_view_post->name }}" decoding="async"/>
+                                                         alt="{{ $most_view_post->name }}" decoding="async" loading="lazy"/>
                                                 </a>
                                                 <span class="trending-counter">{{ $loop->index + 1 }}</span>
                                             </div>
@@ -523,7 +519,7 @@
         </div>
         <div class="above-footer-widgets-section ascendoor-widget-area">
             <div class="ascendoor-wrapper">
-                @if($list_category_post->has(11))
+                @if($list_category_post->has(11) && $list_category_post->get(11)->posts->isNotEmpty())
                     @php($category_post_11 = $list_category_post->get(11))
                     <section id="ascendoor_news_posts_carousel_widget-5"
                              class="widget ascendoor-widget magazine-post-carousel-section">
@@ -542,7 +538,7 @@
                                                      src="{{ $post_cat11->image }}"
                                                      class="attachment-post-thumbnail size-post-thumbnail wp-post-image"
                                                      alt="{{ $post_cat11->name }}"
-                                                     decoding="async"/>
+                                                     decoding="async" loading="lazy"/>
                                             </a>
                                         </div>
                                         <div class="mag-post-detail">
@@ -577,7 +573,7 @@
                         </div>
                     </section>
                 @endif
-                @if($list_category_post->has(12))
+                @if($list_category_post->has(12) && $list_category_post->get(12)->posts->isNotEmpty())
                     @php($category_post_12 = $list_category_post->get(12))
                     <section id="ascendoor_news_magazine_grid_widget-5"
                              class="widget ascendoor-widget magazine-grid-section style-1">
@@ -596,7 +592,7 @@
                                                      src="{{ $post_cat12->image }}"
                                                      class="attachment-post-thumbnail size-post-thumbnail wp-post-image"
                                                      alt="{{ $post_cat12->name }}"
-                                                     decoding="async"/>
+                                                     decoding="async" loading="lazy"/>
                                             </a>
                                         </div>
                                         <div class="mag-post-detail">

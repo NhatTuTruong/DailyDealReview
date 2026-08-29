@@ -1,6 +1,6 @@
 <?php
 
-namespace app\Imports;
+namespace App\Imports;
 
 use App\Models\Category;
 use App\Models\Offer;

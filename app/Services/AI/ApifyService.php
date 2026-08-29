@@ -2,10 +2,9 @@
 
 namespace App\Services\AI;
 
-use Illuminate\Support\Facades\File;
+use App\Libs\ImageWebpConverter;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 
 class ApifyService
 {
@@ -297,16 +296,7 @@ class ApifyService
                 return $this->contentHashCache[$contentHash];
             }
 
-            $uploadPath = public_path(self::UPLOAD_DIR);
-            if (!File::exists($uploadPath)) {
-                File::makeDirectory($uploadPath, 0755, true);
-            }
-
-            $extension = $this->guessExtension($url, $response->body());
-            $filename  = $prefix . '-' . Str::random(16) . '.' . $extension;
-            File::put($uploadPath . '/' . $filename, $response->body());
-
-            $localPath = '/' . self::UPLOAD_DIR . '/' . $filename;
+            $localPath = ImageWebpConverter::saveAsWebp($response->body(), self::UPLOAD_DIR, $prefix);
             $this->downloadCache[$cacheKey] = $localPath;
             $this->contentHashCache[$contentHash] = $localPath;
 
@@ -333,27 +323,6 @@ class ApifyService
         $path = strtolower($parsed['path'] ?? '');
 
         return $host . $path;
-    }
-
-    private function guessExtension(string $url, string $content): string
-    {
-        $path = parse_url($url, PHP_URL_PATH) ?? '';
-        $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
-        if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'], true)) {
-            return $ext === 'jpeg' ? 'jpg' : $ext;
-        }
-
-        $info = @getimagesizefromstring($content);
-        if ($info && isset($info['mime'])) {
-            return match ($info['mime']) {
-                'image/jpeg' => 'jpg',
-                'image/png'  => 'png',
-                'image/gif'  => 'gif',
-                'image/webp' => 'webp',
-                default      => 'jpg',
-            };
-        }
-        return 'jpg';
     }
 
     /**

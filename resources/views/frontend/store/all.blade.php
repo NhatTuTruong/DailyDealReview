@@ -79,5 +79,22 @@
     </section>
 @endsection
 
+@push('head')
+    <link rel="stylesheet" href="{{ asset('css/deals/bootstrap.min.css') }}?v=1.1.3"/>
+    <style>
+        .stores-section .row,
+        .pages-breadcumb .row {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .stores-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+    </style>
+@endpush
+
 @push('bottom')
 @endpush

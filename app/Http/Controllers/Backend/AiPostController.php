@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use App\Models\Post;
 use App\Models\Store;
 use App\Services\AI\PostGeneratorService;
@@ -91,10 +92,21 @@ class AiPostController extends Controller
 
             $post = new Post();
             $post->fill($data);
+
+            $postCategoryId = !empty($data['cat_id'])
+                ? (int) $data['cat_id']
+                : Category::getPostCategoryIdFromStoreCategory(
+                    Store::query()->whereKey($data['store_id'])->value('cat_id')
+                );
+
+            if ($postCategoryId) {
+                $post->cat_id = $postCategoryId;
+            }
+
             $post->save();
 
-            if (!empty($data['cat_id'])) {
-                $post->categories()->sync([(int)$data['cat_id']]);
+            if ($postCategoryId) {
+                $post->categories()->sync([$postCategoryId]);
             }
 
             DB::commit();

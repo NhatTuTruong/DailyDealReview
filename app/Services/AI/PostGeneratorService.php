@@ -2,9 +2,11 @@
 
 namespace App\Services\AI;
 
+use App\Libs\ImageWebpConverter;
 use App\Models\Offer;
 use App\Models\Setting;
 use App\Models\Store;
+use App\Models\Category;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str as StrHelper;
@@ -58,7 +60,7 @@ class PostGeneratorService
         }
 
         // 3. Chuẩn bị context cho Gemini
-        $siteName = Setting::getSettingByKey('site_name', 'DealHunter365');
+        $siteName = Setting::siteName();
         $language = App::getLocale() === 'vi' ? 'Vietnamese' : 'English';
 
         $offersInfo = $offers->map(function ($o) {
@@ -88,8 +90,8 @@ class PostGeneratorService
             $store
         );
 
-        // 6. Ảnh đại diện đã được Apify download về server thành URL local
-        $localImage = $featuredImage;
+        // 6. Ảnh đại diện đã được Apify download về server thành URL local (WebP)
+        $postImage = ImageWebpConverter::ensureWebpForPost($featuredImage ?: $store->image, 'featured');
 
         // 7. Chuẩn bị slug
         $baseSlug = StrHelper::slug($generated['name'] ?? $store->name);
@@ -97,17 +99,20 @@ class PostGeneratorService
             $baseSlug = StrHelper::slug($store->name);
         }
 
+        $postCategoryId = Category::getPostCategoryIdFromStoreCategory($store->cat_id ?? 0);
+
         return [
             'name' => $generated['name'] ?? $store->name . ' - Review & Coupons',
             'slug' => $baseSlug,
             'description' => $generated['description'] ?? '',
             'content' => $content,
-            'image' => $localImage ?? $store->image,
+            'image' => $postImage ?? $store->image,
             'meta_title' => $generated['meta_title'] ?? '',
             'meta_keywords' => $generated['meta_keywords'] ?? '',
             'meta_description' => $generated['meta_description'] ?? '',
             'store_id' => $store->id,
-            'cat_id' => $store->cat_id ?? 0,
+            'cat_id' => $postCategoryId ?? 0,
+            'cat_ids' => $postCategoryId ? [$postCategoryId] : [],
         ];
     }
 

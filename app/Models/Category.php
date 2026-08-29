@@ -3,11 +3,14 @@
 namespace App\Models;
 
 use App\Libs\Util;
+use App\Libs\FrontendCache;
+use App\Models\Post;
 use App\Traits\HasGlobalScopes;
 use App\Traits\HasImageCleanup;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 class Category extends Model
@@ -43,7 +46,12 @@ class Category extends Model
         });
 
         static::saved(function ($category) {
+            FrontendCache::flush();
             //Slug::insertOrUpdateSlug($category->slug, Slug::MODULE['CATEGORY'], $category->id);
+        });
+
+        static::deleted(function () {
+            FrontendCache::flush();
         });
     }
 
@@ -164,6 +172,24 @@ class Category extends Model
         }
         return $html;
 
+    }
+
+    public static function getPostCategoryIdFromStoreCategory(?int $storeCategoryId): ?int
+    {
+        if (empty($storeCategoryId)) {
+            return null;
+        }
+
+        $storeCategory = self::query()->find($storeCategoryId);
+        if (!$storeCategory) {
+            return null;
+        }
+
+        return self::query()
+            ->where('language', $storeCategory->language)
+            ->where('type', self::CATEGORY_TYPE_POST)
+            ->where('name', $storeCategory->name)
+            ->value('id');
     }
 
     public static function makeArrayListCategory($parent_id = 0, $type = -1): array
@@ -314,20 +340,116 @@ class Category extends Model
             ->first();
     }
 
-    public static function getCategoryPostHome($limit_post = 6)
+    public static function getCategoryPostHome(int $limitPost = 6, int $limitCategories = 13)
     {
-        return Category::where('at_home', 1)
+        $categories = Category::query()
             ->language()
             ->active()
             ->where('type', Category::CATEGORY_TYPE_POST)
-            ->orderBy('priority', 'asc')
-            ->with([
-                'posts' => function ($q) use ($limit_post) {
-                    $q->orderBy('priority', 'desc')->latest()->take($limit_post)->with('categories');
-                }
-            ])
-            ->take(13)
+            ->whereHas('posts', function ($q) {
+                $q->active()->language();
+            })
+            ->orderByDesc('at_home')
+            ->orderByDesc('priority')
+            ->orderBy('name')
+            ->take($limitCategories)
             ->get();
+
+        if ($categories->isEmpty()) {
+            return collect();
+        }
+
+        $categoryIds = $categories->pluck('id');
+        $language = App::getLocale();
+
+        $pivotRows = DB::table('category_post_rel')
+            ->join('posts', 'posts.id', '=', 'category_post_rel.post_id')
+            ->whereIn('category_post_rel.category_id', $categoryIds)
+            ->where('posts.status', 1)
+            ->where('posts.language', $language)
+            ->select('category_post_rel.category_id', 'posts.id as post_id', 'posts.priority', 'posts.id as sort_id')
+            ->orderByDesc('posts.priority')
+            ->orderByDesc('posts.id')
+            ->get();
+
+        $postsByCategoryId = [];
+        $allPostIds = [];
+
+        foreach ($pivotRows as $row) {
+            $categoryId = (int) $row->category_id;
+            $postId = (int) $row->post_id;
+
+            if (!isset($postsByCategoryId[$categoryId])) {
+                $postsByCategoryId[$categoryId] = [];
+            }
+
+            if (count($postsByCategoryId[$categoryId]) >= $limitPost) {
+                continue;
+            }
+
+            if (in_array($postId, $postsByCategoryId[$categoryId], true)) {
+                continue;
+            }
+
+            $postsByCategoryId[$categoryId][] = $postId;
+            $allPostIds[] = $postId;
+        }
+
+        if (empty($allPostIds)) {
+            return $categories->map(function (Category $category) {
+                $category->setRelation('posts', collect());
+
+                return $category;
+            })->values();
+        }
+
+        $posts = Post::query()
+            ->select((new Post())->getSimpleField())
+            ->with('categories')
+            ->whereIn('id', array_unique($allPostIds))
+            ->get()
+            ->keyBy('id');
+
+        return $categories->map(function (Category $category) use ($postsByCategoryId, $posts) {
+            $categoryPosts = collect($postsByCategoryId[$category->id] ?? [])
+                ->map(fn (int $postId) => $posts->get($postId))
+                ->filter()
+                ->values();
+
+            $category->setRelation('posts', $categoryPosts);
+
+            return $category;
+        })->values();
+    }
+
+    public static function repairPostCategoryLinksFromStore(): int
+    {
+        $repaired = 0;
+
+        Post::query()
+            ->with('categories')
+            ->whereHas('categories', fn ($q) => $q->where('type', self::CATEGORY_TYPE_STORE))
+            ->get()
+            ->each(function (Post $post) use (&$repaired) {
+                $categoryIds = $post->categories->map(function (Category $category) {
+                    if ((int) $category->type === self::CATEGORY_TYPE_STORE) {
+                        return self::getPostCategoryIdFromStoreCategory($category->id) ?? $category->id;
+                    }
+
+                    return $category->id;
+                })->filter()->unique()->values()->all();
+
+                if (empty($categoryIds)) {
+                    return;
+                }
+
+                $post->categories()->sync($categoryIds);
+                $post->cat_id = $categoryIds[0];
+                $post->save();
+                $repaired++;
+            });
+
+        return $repaired;
     }
 
 }

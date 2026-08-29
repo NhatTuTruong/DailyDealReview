@@ -36,8 +36,8 @@
                         <div class="form-group row">
                             <label class="col-sm-2 col-form-label font-weight-bold">Chọn Store:</label>
                             <div class="col-sm-6">
-                                <select id="ai-store-select" class="form-control form-control-lg">
-                                    <option value="">-- Chọn store --</option>
+                                <select id="ai-store-select" class="form-control">
+                                    <option value=""></option>
                                     {!! \App\Models\Store::makeListStore(0, true) !!}
                                 </select>
                             </div>
@@ -93,9 +93,9 @@
                                        :messages="$errors->get('slug')"/>
                         <x-forms.input name="priority" value="{{ (old('priority') ?: $post->priority) ?: 9999 }}"
                                        label="Sắp xếp" type="number" :messages="$errors->get('priority')"/>
-                        <x-forms.select2 name="cat_ids[]" label="Danh mục cha"
-                                         :options="new HtmlString($option_categories)"
-                                         :messages="$errors->get('cat_ids')" multiple="multiple" id="cat_ids"/>
+                        <x-forms.select name="cat_ids[]" label="Danh mục cha"
+                                        :options="new HtmlString($option_categories)"
+                                        :messages="$errors->get('cat_ids')" multiple="multiple" id="cat_ids"/>
                         <x-forms.input name="created_at" id="created_at" value="{{ (old('created_at') ?: $post->created_at) ?: date('Y/m/d') }}"
                                        label="Ngày đăng" :messages="$errors->get('created_at')"/>
                         <x-forms.upload name="image" value="{{ old('image') ?: $post->image }}" uploadFolder="blog" label="Image"
@@ -134,23 +134,55 @@
 @endsection
 
 @section('bottom')
+    <link rel="stylesheet" href="{{ asset('backend_assets/vendor/select2/select2.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('backend_assets/vendor/select2/select2-bootstrap4.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('backend_assets/vendor/select2/custom.css') }}">
+    <link rel="stylesheet" type="text/css"
+          href="{{ asset('backend_assets/vendor/daterangepicker/daterangepicker.css') }}">
     <script src="{{ asset('backend_assets/vendor/moment/moment.min.js') }}"></script>
     <script src="{{ asset('backend_assets/vendor/daterangepicker/daterangepicker.min.js') }}"></script>
+    <script src="{{ asset('backend_assets/vendor/select2/select2.full.min.js') }}"></script>
     <script>
+        $(function () {
+            $('#created_at').daterangepicker({
+                singleDatePicker: true,
+                showDropdowns: true,
+                minYear: 2015,
+                maxYear: new Date().getFullYear() + 1,
+                locale: {
+                    format: 'YYYY/MM/DD'
+                }
+            });
 
-        $('#created_at').daterangepicker({
-            singleDatePicker: true,
-            showDropdowns: true,
-            minYear: 2015,
-            maxYear: new Date().getFullYear() + 1,
-            locale: {
-                format: 'YYYY/MM/DD'
-            }
-        });
-
-        // =================== AI Post Generator ===================
-        (function () {
             var $aiSelect = $('#ai-store-select');
+
+            if ($aiSelect.length) {
+                $aiSelect.select2({
+                    theme: 'bootstrap4',
+                    placeholder: '-- Chọn store --',
+                    allowClear: true,
+                    width: '100%',
+                    minimumResultsForSearch: 0,
+                    language: {
+                        noResults: function () {
+                            return 'Không tìm thấy store';
+                        },
+                        searching: function () {
+                            return 'Đang tìm...';
+                        }
+                    }
+                });
+            }
+
+            $('#cat_ids').select2({
+                theme: 'bootstrap4',
+                width: '100%'
+            });
+
+            if (!$aiSelect.length) {
+                return;
+            }
+
             var $aiBtn = $('#btn-ai-generate');
             var $aiStatus = $('#ai-status');
             var $aiSpinner = $('#ai-spinner');
@@ -169,7 +201,6 @@
                 $aiBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Đang tạo...');
                 $aiSpinner.show();
 
-                // Step 1: Generate content
                 $.ajax({
                     url: '{{ route("backend_post_ai_generate") }}',
                     method: 'POST',
@@ -184,7 +215,6 @@
                         }
                         var d = resp.data;
 
-                        // Step 2: Save
                         $aiStatus.removeClass('alert-info').addClass('alert-warning')
                             .html('<i class="fas fa-save"></i> &nbsp;Nội dung đã sinh! Đang lưu bài viết...');
 
@@ -203,6 +233,7 @@
                                 meta_description: d.meta_description,
                                 store_id: d.store_id,
                                 cat_id: d.cat_id,
+                                cat_ids: d.cat_ids || (d.cat_id ? [d.cat_id] : []),
                             },
                             success: function (saveResp) {
                                 if (!saveResp.success) {
@@ -230,9 +261,6 @@
                     $aiSpinner.hide();
                 }
             });
-        })();
-
+        });
     </script>
-    <link rel="stylesheet" type="text/css"
-          href="{{ asset('backend_assets/vendor/daterangepicker/daterangepicker.css') }}">
 @endsection
