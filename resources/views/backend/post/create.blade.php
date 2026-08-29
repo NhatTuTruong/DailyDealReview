@@ -250,7 +250,15 @@
                         });
                     },
                     error: function (xhr) {
-                        showError('Lỗi khi tạo: ' + (xhr.responseJSON?.message || 'Không thể tạo bài viết'));
+                        var msg = xhr.responseJSON?.message;
+                        if (!msg) {
+                            if (xhr.status === 0) {
+                                msg = 'Mất kết nối hoặc request bị timeout (AI có thể mất 1-3 phút). Thử lại.';
+                            } else {
+                                msg = 'Không thể tạo bài viết (HTTP ' + xhr.status + ')';
+                            }
+                        }
+                        showError('Lỗi khi tạo: ' + msg);
                     }
                 });
 

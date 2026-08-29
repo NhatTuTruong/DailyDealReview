@@ -109,8 +109,9 @@
                                 <div class="alert alert-info alert-dismissible">
                                     <h5><i class="icon fas fa-info"></i> Hướng dẫn</h5>
                                     <ul class="mb-0">
-                                        <li>Tự động tạo bài viết blog cho store theo thứ tự từ cũ tới mới.</li>
-                                        <li>Mỗi lần chạy sẽ tạo <strong>1 bài viết</strong> cho store chưa có bài viết (hoặc store có bài viết lâu nhất).</li>
+                                        <li>Xoay vòng store theo thứ tự <strong>id cũ → mới</strong>, hết danh sách quay lại đầu.</li>
+                                        <li>Mỗi lần chạy tạo <strong>1 bài viết</strong> cho store đến lượt (kể cả store đã có bài viết trước đó — không bỏ qua).</li>
+                                        <li>Chỉ lấy store đang active, đúng ngôn ngữ và có offer active.</li>
                                     </ul>
                                 </div>
 

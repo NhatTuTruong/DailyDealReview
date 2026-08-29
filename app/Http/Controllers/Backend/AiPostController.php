@@ -34,9 +34,26 @@ class AiPostController extends Controller
             'store_id' => 'required|integer|exists:stores,id',
         ]);
 
+        set_time_limit(300);
+        ini_set('memory_limit', '512M');
+
+        $store = Store::query()
+            ->whereKey($request->input('store_id'))
+            ->whereHas('offers', function ($q) {
+                $q->active()->language();
+            })
+            ->first();
+
+        if (!$store) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Store không tồn tại, đã bị xóa, hoặc chưa có offer active.',
+            ], 422);
+        }
+
         try {
             $service = new PostGeneratorService();
-            $data = $service->generateFromStore($request->input('store_id'));
+            $data = $service->generateFromStore($store->id);
 
             return response()->json([
                 'success' => true,

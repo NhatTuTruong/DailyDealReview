@@ -49,7 +49,7 @@ class ApifyService
         $error = $this->keyManager->call(function (string $apiKey) use ($query, &$images) {
             $payload = [
                 'queries' => [$query],
-                'maxResultsPerQuery' => 20,
+                'maxResultsPerQuery' => 10,
                 'gl' => 'us',
                 'hl' => 'en',
             ];
@@ -290,13 +290,19 @@ class ApifyService
                 return '';
             }
 
-            $contentHash = md5($response->body());
+            $body = $response->body();
+            if (strlen($body) > 8 * 1024 * 1024) {
+                Log::warning("Apify download skipped ({$prefix}): image too large - {$url}");
+                return '';
+            }
+
+            $contentHash = md5($body);
             if (isset($this->contentHashCache[$contentHash])) {
                 $this->downloadCache[$cacheKey] = $this->contentHashCache[$contentHash];
                 return $this->contentHashCache[$contentHash];
             }
 
-            $localPath = ImageWebpConverter::saveAsWebp($response->body(), self::UPLOAD_DIR, $prefix);
+            $localPath = ImageWebpConverter::saveAsWebp($body, self::UPLOAD_DIR, $prefix);
             $this->downloadCache[$cacheKey] = $localPath;
             $this->contentHashCache[$contentHash] = $localPath;
 

@@ -7,6 +7,10 @@ use Illuminate\Support\Str;
 
 class ImageWebpConverter
 {
+    private const MAX_SOURCE_BYTES = 8_388_608; // 8 MB
+    private const MAX_GD_PIXELS = 4_000_000;
+    private const MAX_OUTPUT_DIMENSION = 1600;
+
     public static function isSupported(): bool
     {
         return function_exists('imagewebp') && function_exists('imagecreatefromstring');
@@ -21,10 +25,27 @@ class ImageWebpConverter
             return null;
         }
 
+        if (strlen($content) > self::MAX_SOURCE_BYTES) {
+            return null;
+        }
+
+        $info = @getimagesizefromstring($content);
+        if (!$info || empty($info[0]) || empty($info[1])) {
+            return null;
+        }
+
+        $width = (int) $info[0];
+        $height = (int) $info[1];
+        if ($width <= 0 || $height <= 0 || ($width * $height) > self::MAX_GD_PIXELS) {
+            return null;
+        }
+
         $image = @imagecreatefromstring($content);
         if ($image === false) {
             return null;
         }
+
+        $image = self::downscaleIfNeeded($image, self::MAX_OUTPUT_DIMENSION);
 
         if (function_exists('imagepalettetotruecolor')) {
             imagepalettetotruecolor($image);
@@ -121,5 +142,31 @@ class ImageWebpConverter
         }
 
         return 'jpg';
+    }
+
+    /**
+     * @param \GdImage $image
+     * @return \GdImage
+     */
+    private static function downscaleIfNeeded($image, int $maxDim)
+    {
+        $width = imagesx($image);
+        $height = imagesy($image);
+
+        if ($width <= $maxDim && $height <= $maxDim) {
+            return $image;
+        }
+
+        $ratio = min($maxDim / $width, $maxDim / $height);
+        $newWidth = max(1, (int) round($width * $ratio));
+        $newHeight = max(1, (int) round($height * $ratio));
+
+        $resized = imagecreatetruecolor($newWidth, $newHeight);
+        imagealphablending($resized, false);
+        imagesavealpha($resized, true);
+        imagecopyresampled($resized, $image, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+        imagedestroy($image);
+
+        return $resized;
     }
 }

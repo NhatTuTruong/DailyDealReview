@@ -16,7 +16,10 @@ class AutoGeneratePost extends Command
 {
     protected $signature = 'post:auto-generate {--force : Bỏ qua kiểm tra thời gian chờ}';
 
-    protected $description = 'Tự động tạo bài viết blog cho store (theo thứ tự cũ -> mới, chưa có bài viết ưu tiên trước)';
+    protected $description = 'Tự động tạo bài viết blog cho store (xoay vòng store cũ -> mới, hết danh sách quay lại đầu)';
+
+    private const LAST_RUN_CACHE_KEY = 'ai_auto_post:last_run';
+    private const LAST_STORE_CACHE_KEY = 'ai_auto_post:last_store_id';
 
     public function handle(PostGeneratorService $service): int
     {
@@ -28,10 +31,9 @@ class AutoGeneratePost extends Command
         }
 
         $interval = (int) ($settings['ai_auto_post_interval'] ?? 30);
-        $cacheKey = 'ai_auto_post:last_run';
 
         if (!$this->option('force') && $interval > 0) {
-            $lastRun = Cache::get($cacheKey);
+            $lastRun = Cache::get(self::LAST_RUN_CACHE_KEY);
             if ($lastRun) {
                 $minutesAgo = Carbon::parse($lastRun)->diffInMinutes(now());
                 if ($minutesAgo < $interval) {
@@ -44,11 +46,11 @@ class AutoGeneratePost extends Command
         $store = $this->pickStore();
 
         if (!$store) {
-            $this->info('No store available for auto post. All stores have recent posts or no stores exist.');
+            $this->info('No store available for auto post (no active store with offers).');
             return self::SUCCESS;
         }
 
-        $this->info("Generating post for store: {$store->name} (ID: {$store->id})...");
+        $this->info("Generating post for store: {$store->name} (ID: {$store->id}) [round-robin]...");
 
         try {
             $data = $service->generateFromStore($store->id);
@@ -74,7 +76,7 @@ class AutoGeneratePost extends Command
                 $post->categories()->sync([$postCategoryId]);
             }
 
-            Cache::put($cacheKey, now()->toDateTimeString(), now()->addDays(30));
+            Cache::put(self::LAST_RUN_CACHE_KEY, now()->toDateTimeString(), now()->addDays(30));
 
             $this->info("Post created successfully! ID: {$post->id}");
             Log::info('Auto post created', [
@@ -99,31 +101,35 @@ class AutoGeneratePost extends Command
 
     private function pickStore(): ?Store
     {
-        // Ưu tiên store chưa có bài viết nào
-        $storesWithoutPost = Store::whereDoesntHave('posts', function ($q) {
-            $q->where('language', app()->getLocale());
-        })
+        // Xoay vòng mọi store đủ điều kiện — không loại store đã có bài viết.
+        $stores = Store::query()
+            ->active()
+            ->language()
+            ->whereHas('offers', function ($q) {
+                $q->active()->language();
+            })
             ->orderBy('id')
-            ->get();
+            ->get(['id', 'name', 'cat_id']);
 
-        if ($storesWithoutPost->isNotEmpty()) {
-            return $storesWithoutPost->first();
+        if ($stores->isEmpty()) {
+            return null;
         }
 
-        // Nếu tất cả đã có bài, lấy store có bài viết lâu nhất
-        return Store::whereHas('posts', function ($q) {
-                $q->where('language', app()->getLocale());
-            })
-            ->with(['posts' => function ($q) {
-                $q->select('store_id', 'created_at')
-                  ->where('language', app()->getLocale())
-                  ->orderBy('created_at', 'asc');
-            }])
-            ->get()
-            ->sortBy(function ($store) {
-                return $store->posts->first()->created_at ?? now();
-            })
-            ->first();
+        $lastStoreId = (int) Cache::get(self::LAST_STORE_CACHE_KEY, 0);
+
+        $nextStore = $stores->first(fn (Store $store) => $store->id > $lastStoreId)
+            ?? $stores->first();
+
+        Cache::put(self::LAST_STORE_CACHE_KEY, $nextStore->id, now()->addDays(365));
+
+        Log::info('Auto post store rotation', [
+            'last_store_id' => $lastStoreId,
+            'picked_store_id' => $nextStore->id,
+            'picked_store_name' => $nextStore->name,
+            'total_eligible_stores' => $stores->count(),
+        ]);
+
+        return $nextStore;
     }
 
     private function makeUniqueSlug(string $slug): string
