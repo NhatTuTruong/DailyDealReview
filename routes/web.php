@@ -26,7 +26,8 @@ Route::localized(function () {
     // Route::get('/sitemap.xml', [HomeController::class, 'siteMap'])->name('site_map');
     Route::match(['get', 'post'], '/contact.html', [HomeController::class, 'contact'])->name('contact');
 
-    Route::post('/search', [HomeController::class, 'search'])->name('search');
+    Route::get('/search', [PostController::class, 'search'])->name('search');
+    Route::match(['get', 'post'], '/search/suggest', [HomeController::class, 'search'])->name('search_suggest');
     Route::get('/page/{slug}.html', [HomeController::class, 'page'])->where(['slug' => '[a-z0-9\-]+'])->name('page_content');
     Route::post('subscribe', [HomeController::class, 'subscribe'])->name('subscribe');
 

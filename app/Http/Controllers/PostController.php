@@ -75,39 +75,43 @@ class PostController extends Controller
 
     public function search(Request $request)
     {
-        $language = App::getLocale();
-        $category = new Category();
         $clsPost = new Post();
 
-        $key = $request->get('key');
+        $key = trim((string) $request->get('key', ''));
+        if ($key === '') {
+            return redirect()->route('home_page');
+        }
 
-        $paginate = 8;
-        $query_post = Post::with('category')
-            ->where('status', 1)
-            ->where('language', $language)
-            ->where('name', 'like', '%' . $key . '%')
-            ->orderBy('priority')
-            ->orderBy('id', 'desc');
-        $posts = $query_post->paginate($paginate);
+        $like = '%' . str_replace(['%', '_'], ['\%', '\_'], $key) . '%';
 
-        $category->name = 'Kết quả tìm kiếm cho từ khóa "' . $key . '"';
-        $children_category = $category->getChildrenCategories();
+        $posts = Post::with('categories')
+            ->active()
+            ->language()
+            ->where(function ($query) use ($like) {
+                $query->where('name', 'like', $like)
+                    ->orWhere('slug', 'like', $like);
+            })
+            ->orderByDesc('priority')
+            ->orderByDesc('id')
+            ->paginate(8);
 
-        $list_post_popular = $clsPost->getListPopular(4);
+        $category = new Category();
+        $category->name = 'Search results for "' . $key . '"';
+
+        $list_latest_post = $clsPost->getListLatestPost();
+        $list_category = Category::getAllMenuLink(0, Category::CATEGORY_TYPE_POST);
 
         $setting = Setting::getAllSetting();
-        $setting['meta_title'] = 'Search';
+        $setting['meta_title'] = 'Search: ' . $key;
 
-        return view('frontend.post.index',
-            compact(
-                'posts',
-                'key',
-                'category',
-                'children_category',
-                'list_post_popular',
-                'setting'
-            )
-        );
+        return view('frontend.post.index', compact(
+            'posts',
+            'key',
+            'category',
+            'list_latest_post',
+            'list_category',
+            'setting'
+        ));
     }
 
     public function detail(Request $request, $slug, $id)

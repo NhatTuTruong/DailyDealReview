@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link rel="stylesheet" href="{{ asset('vendor/slick/slick.min.css') }}?v=1.1.3" media="all"/>
-    <link rel="stylesheet" href="{{ asset('css/style.css') }}?v=1.2.1" media="all"/>
+    <link rel="stylesheet" href="{{ asset('css/style.css') }}?v=1.2.2" media="all"/>
     <link rel="preload" as="image" href="{{ asset('images/top-banner.webp') }}" fetchpriority="high">
     @if(!empty($setting['facebook_app_id']))
         <link rel="dns-prefetch" href="https://connect.facebook.net">

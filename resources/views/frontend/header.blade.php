@@ -62,6 +62,7 @@
                             <p class="site-description">{{ $setting['slogan'] }} </p>
                         </div>
                     </div>
+                    @include('frontend.blocks.banner-blog-stack')
                
                 </div>
             </div>
@@ -124,7 +125,7 @@
                                                    placeholder="Search &hellip;" autocomplete="off"
                                                    value="{{ $key ?? '' }}" name="key"/>
                                         </label>
-                                        <input type="button" class="search-submit" value="Search"/>
+                                        <input type="submit" class="search-submit" value="Search"/>
                                     </form>
                                     <div class="search_results"></div>
                                 </div>
@@ -140,23 +141,33 @@
 @push('bottom')
     <script>
         $(document).ready(function () {
-            $('.js-search-auto-completed').on('keyup', function () {
+            var $searchField = $('.header-search .js-search-auto-completed');
+            var $searchResults = $('.header-search .search_results');
+
+            $searchField.on('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    $(this).closest('form.search-form').trigger('submit');
+                }
+            });
+
+            $searchField.on('keyup', function () {
                 let keyword = $(this).val().trim();
 
                 if (keyword.length < 3) {
-                    $('.search_results').html('');
+                    $searchResults.html('');
                     return;
                 }
 
                 $.ajax({
-                    url: '{{ route("search") }}',
-                    method: 'POST',
+                    url: '{{ route("search_suggest") }}',
+                    method: 'GET',
                     data: {keyword: keyword},
                     success: function (response) {
-                        $('.search_results').html(response);
+                        $searchResults.html(response);
                     },
                     error: function () {
-                        $('.search_results').html('<p class="text-danger">No results</p>');
+                        $searchResults.html('<p class="text-danger">No results</p>');
                     }
                 });
             });

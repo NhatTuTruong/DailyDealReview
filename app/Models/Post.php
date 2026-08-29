@@ -242,18 +242,24 @@ class Post extends Model
 
     public function getListPostHotWithImage($limit = 6)
     {
-        $language = App::getLocale();
-
-        return Post::select($this->getSimpleField())
-            ->where('language', $language)
+        return Post::with('categories')
+            ->select($this->getSimpleField())
+            ->language()
             ->active()
-            ->where('is_hot', 1)
             ->whereNotNull('image')
             ->where('image', '<>', '')
             ->orderByDesc('view_num')
             ->orderByDesc('id')
             ->limit($limit)
             ->get();
+    }
+
+    public static function countActivePosts(?string $language = null): int
+    {
+        return Post::query()
+            ->language($language)
+            ->active()
+            ->count();
     }
 
     public function getListLatestPost($limit = 5)

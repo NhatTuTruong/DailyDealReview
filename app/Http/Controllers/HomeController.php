@@ -82,10 +82,10 @@ class HomeController extends Controller
 
     public function search(Request $request)
     {
-        $keyword = $request->input('keyword');
+        $keyword = trim((string) ($request->input('keyword') ?? $request->input('key') ?? ''));
 
-        if (!$keyword) {
-            return response()->json(['message' => 'No results'], 400);
+        if ($keyword === '') {
+            return '<p class="text-muted">No results</p>';
         }
 
         $setting = Setting::getAllSetting();

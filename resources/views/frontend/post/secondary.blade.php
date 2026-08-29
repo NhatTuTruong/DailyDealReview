@@ -1,14 +1,14 @@
 <section id="block-2" class="widget widget_block widget_search">
-    <form role="search" method="get" action="#!"
+    <form role="search" method="get" action="{{ route('search') }}"
           class="wp-block-search__button-outside wp-block-search__text-button wp-block-search">
         <label class="wp-block-search__label" for="wp-block-search__input-1">Search</label>
         <div class="wp-block-search__inside-wrapper ">
             <input class="wp-block-search__input js-search-auto-completed"
                    id="wp-block-search__input-1"
                    placeholder="" value="" type="search"
-                   name="s" required autocomplete="off"/>
+                   name="key" required autocomplete="off"/>
             <button aria-label="Search" class="wp-block-search__button wp-element-button"
-                    type="button">Search
+                    type="submit">Search
             </button>
         </div>
     </form>

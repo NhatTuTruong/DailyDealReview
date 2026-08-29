@@ -53,7 +53,9 @@ abstract class Controller
                 'main_menu' => Menu::getAllMenuLink(),
                 'footer_menu' => Menu::getAllMenuLink('footer'),
                 'list_most_view_post' => $clsPost->getListMostViewPost(6),
+                'post_count' => Post::countActivePosts(),
                 'list_hot_post_gallery' => $clsPost->getListPostHotWithImage(6),
+                'banner_blog_stack' => $clsPost->getListPostHotWithImage(3),
                 'banner_posts' => $clsPost->getListLatestPost(3),
             ];
         });

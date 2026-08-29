@@ -32,7 +32,7 @@
                     @endif
                 </div>
                 <div class="footer-widget-single">
-                    @if(!empty($share['list_hot_post_gallery']) && $share['list_hot_post_gallery']->count() >= 6)
+                    @if(($share['post_count'] ?? 0) >= 6 && !empty($share['list_hot_post_gallery']) && $share['list_hot_post_gallery']->count() > 0)
                     <section id="block-10" class="widget widget_block">
                         <h2 class="wp-block-heading">Blog Gallery</h2>
                     </section>
