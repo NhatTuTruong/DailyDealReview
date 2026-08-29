@@ -262,6 +262,9 @@ App.ajax = function (url, data, callback, method, options) {
                 method: 'POST',
                 dataType: 'json',
                 timeout: 30000, // 30 seconds?,
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
                 success: function (response, textStatus, xhr) {
                     success(response, textStatus);
 
@@ -354,22 +357,28 @@ App.ajax = function (url, data, callback, method, options) {
             e.preventDefault();
 
             var data = this._getCheckerValues();
-            // console.log(data);return;
+
             if (!data.ids.length) {
+                alert('Vui lòng chọn ít nhất một bản ghi cần xóa.');
                 return;
             }
-            if (confirm('Bạn có chắc chắn muốn xóa bản ghi này không?')) {
-                ducnhCMS.ajax(this.url, {ids: data.ids}, function (ajaxData) {
-                    if (ajaxData.code == 200) {
-                        for (var i = 0; i < data.rows.length; i++) {
-                            // alert(data.rows[i]);
-                            data.rows[i].hide().remove();
-                        }
 
-                        this.$counter.text(0);
-                    }
-                }.bind(this));
+            var message = data.ids.length === 1
+                ? 'Bạn có chắc chắn muốn xóa bản ghi đã chọn không?'
+                : 'Bạn có chắc chắn muốn xóa ' + data.ids.length + ' bản ghi đã chọn không?';
+
+            if (!confirm(message)) {
+                return;
             }
+
+            ducnhCMS.ajax(this.url, {ids: data.ids}, function (ajaxData) {
+                if (ajaxData && ajaxData.code == 200) {
+                    window.location.reload();
+                    return;
+                }
+
+                alert('Không thể xóa bản ghi. Vui lòng thử lại.');
+            }.bind(this));
         }
     };
     ducnhCMS.AutoComplete = function ($input) {
@@ -597,6 +606,7 @@ App.ajax = function (url, data, callback, method, options) {
     ducnhCMS.init();
 
     AppRegistry.register('.MassiveRemoveRecords', ducnhCMS.MassiveRemoveRecords);
+    AppRegistry.register('.BulkDeleteRecords', ducnhCMS.MassiveRemoveRecords);
     AppRegistry.register('.auto-complete', ducnhCMS.AutoComplete);
 
 }(jQuery, this, document));
