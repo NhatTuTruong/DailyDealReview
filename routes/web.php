@@ -5,6 +5,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\CouponController;
 use App\Http\Controllers\StoreController;
+use App\Http\Controllers\DealController;
 use App\Http\Controllers\SlugController;
 use App\Http\Controllers\AjaxController;
 use Illuminate\Support\Facades\Route;
@@ -39,7 +40,9 @@ Route::localized(function () {
 
     Route::get('{slug}-n{id}.html', [PostController::class, 'detail'])->where(['slug' => '[a-z0-9\-]+', 'id' => '[0-9]+'])->name('post_detail');
     Route::get('tag/{tag}', [PostController::class, 'tag'])->where(['tag' => '[a-z0-9\-]+'])->name('post_tag');
-    Route::get('blogs', [PostController::class, 'all'])->name('post_all');
+    Route::get('blog', [PostController::class, 'all'])->name('post_all');
+    Route::redirect('blogs', 'blog', 301);
+    Route::get('deals', [DealController::class, 'index'])->name('deal_all');
 
     Route::get('{slug}', [SlugController::class, 'index'])->where(['slug' => '[a-zA-Z0-9\-]+'])->name('category');
 });

@@ -622,7 +622,7 @@
         }
     </style>
     <!-- Styles-->
-    <link rel="stylesheet" type="text/css" href="{{ asset('css/custom.css') }}?v=1.1.3"/>
+    <link rel="stylesheet" type="text/css" href="{{ asset('css/custom.css') }}?v=1.1.4"/>
     <link rel="stylesheet" type="text/css" href="{{ asset('css/ai-post.css') }}?v=1.0.0"/>
     @stack('head')
 

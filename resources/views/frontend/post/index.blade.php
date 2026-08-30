@@ -21,12 +21,23 @@
                                 </li>
                             </ul>
                         </nav>
+                    @elseif(empty($tag) && empty($category) && request()->routeIs('post_all'))
+                        <nav role="navigation" aria-label="Breadcrumbs" class="breadcrumb-trail breadcrumbs">
+                            <ul class="trail-items">
+                                <li class="trail-item trail-begin">
+                                    <a href="{{ route('home_page') }}" rel="home"><span>Home</span></a>
+                                </li>
+                                <li class="trail-item trail-end">
+                                    <span><span>Blog</span></span>
+                                </li>
+                            </ul>
+                        </nav>
                     @endif
                     <header>
-                        <h1 class="page-title">{{ !empty($tag) ? 'Tag: ' . \Illuminate\Support\Str::headline($tag) : (!empty($category) ? $category->name : 'All Posts') }}</h1>
+                        <h1 class="page-title">{{ $pageTitle ?? (!empty($tag) ? 'Tag: ' . \Illuminate\Support\Str::headline($tag) : (!empty($category) ? $category->name : 'Blog')) }}</h1>
                     </header>
                     <div class="magazine-archive-layout grid-layout grid-column-3">
-                        @foreach($posts as $post)
+                        @forelse($posts as $post)
                             <article id="post-{{ $post->id }}"
                                      class="post-{{ $post->id }} post type-post status-publish format-standard has-post-thumbnail hentry">
                                 <div class="mag-post-single">
@@ -69,7 +80,9 @@
                                     </div>
                                 </div>
                             </article>
-                        @endforeach
+                        @empty
+                            <p class="mag-post-empty">No blog posts yet.</p>
+                        @endforelse
                     </div>
                     <nav class="navigation posts-navigation" aria-label="Posts">
                         <h2 class="screen-reader-text">Posts navigation</h2>

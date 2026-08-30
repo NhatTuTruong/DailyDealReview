@@ -50,27 +50,29 @@ class PostController extends Controller
     {
         $clsPost = new Post();
 
-        $paginate = 15;
-        $query_post = Post::with('categories')
+        $posts = Post::with('categories')
             ->active()
             ->language()
-            ->orderBy('id', 'desc');
-        $posts = $query_post->simplePaginate($paginate);
+            ->orderByDesc('priority')
+            ->orderByDesc('id')
+            ->paginate(15);
 
         $list_latest_post = $clsPost->getListLatestPost();
         $list_category = Category::getAllMenuLink(0, Category::CATEGORY_TYPE_POST);
 
         $setting = Setting::getAllSetting();
-        $setting['meta_title'] = 'All Posts';
+        $pageTitle = 'Blog';
+        $setting['meta_title'] = $pageTitle . ' | ' . ($setting['site_name'] ?? '');
+        $setting['meta_description'] = $setting['meta_description'] ?? 'Browse all blog posts, deals guides, and store reviews.';
+        $setting['body_class'] = trim(($setting['body_class'] ?? '') . ' blog archive page');
 
-        return view('frontend.post.index',
-            compact(
-                'posts',
-                'list_latest_post',
-                'list_category',
-                'setting'
-            )
-        );
+        return view('frontend.post.index', compact(
+            'posts',
+            'list_latest_post',
+            'list_category',
+            'setting',
+            'pageTitle',
+        ));
     }
 
     public function search(Request $request)
