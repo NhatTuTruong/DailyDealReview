@@ -342,10 +342,6 @@
             })
         });
 
-        const storePageStartedAt = Date.now();
-        let storeClickedDeal = false;
-        let storeLeaveSent = false;
-
         function csrfHeaders() {
             const token = document.querySelector('meta[name="csrf-token"]');
             return {
@@ -355,32 +351,7 @@
             };
         }
 
-        function sendStoreLeave() {
-            if (storeLeaveSent || storeClickedDeal) {
-                return;
-            }
-            storeLeaveSent = true;
-            const duration = Math.max(0, Math.round((Date.now() - storePageStartedAt) / 1000));
-            fetch('{{ route('api_store_leave') }}', {
-                method: 'POST',
-                headers: csrfHeaders(),
-                body: JSON.stringify({
-                    store_id: {{ (int) $store->id }},
-                    duration_seconds: duration
-                }),
-                keepalive: true
-            }).catch(function () {});
-        }
-
-        document.addEventListener('visibilitychange', function () {
-            if (document.visibilityState === 'hidden') {
-                sendStoreLeave();
-            }
-        });
-        window.addEventListener('pagehide', sendStoreLeave);
-
         function logAffiliateClick(url) {
-            storeClickedDeal = true;
             fetch('{{ route('api_store_click') }}', {
                 method: 'POST',
                 headers: csrfHeaders(),
@@ -394,34 +365,20 @@
 
         function handleClickOffer(event) {
             event.preventDefault();
-            const affiliateUrl = this.getAttribute('data-affiliate_url');
-            const offerUrl = this.getAttribute('data-url');
+            const affiliateUrl = (this.getAttribute('data-affiliate_url') || '').trim();
+            const offerUrl = (this.getAttribute('data-url') || '').trim();
             logAffiliateClick(affiliateUrl);
-            window.open(offerUrl, '_blank');
-            window.location.href = affiliateUrl;
+            if (offerUrl && offerUrl !== window.location.href) {
+                window.open(offerUrl, '_blank');
+            }
+            if (affiliateUrl) {
+                window.location.href = affiliateUrl;
+            }
         }
 
         const btnOfferUrl = document.querySelectorAll('.js-btn_deal_click');
         btnOfferUrl.forEach(function (elm) {
             elm.addEventListener('click', handleClickOffer);
-        })
-
-        document.addEventListener("DOMContentLoaded", function () {
-            if (!localStorage.getItem("hasClickedOnce")) {
-                const handleClick = function (event) {
-
-                    let affiliateUrl = "{{ $best_offer->url }}";
-                    let offerUrl = "{{ $store->getUrl() }}?offer={{ $best_offer->id }}";
-                    logAffiliateClick(affiliateUrl);
-                    window.open(offerUrl, '_blank');
-                    window.location.href = affiliateUrl;
-
-                    localStorage.setItem("hasClickedOnce", "true");
-                    document.removeEventListener("click", handleClick);
-                };
-
-                document.addEventListener("click", handleClick);
-            }
         });
 
     </script>

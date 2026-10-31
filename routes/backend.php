@@ -97,6 +97,7 @@ Route::localized(function () {
         });
 
         Route::get('store-interaction', [StoreInteractionController::class, 'index'])->name('backend_store_interaction');
+        Route::post('store-interaction/bulk-delete', [StoreInteractionController::class, 'bulkDelete'])->name('backend_store_interaction_bulk_delete');
         Route::get('store-interaction/suspicious', [StoreInteractionController::class, 'suspicious'])->name('backend_store_interaction_suspicious');
         Route::post('store-interaction/suspicious/{suspiciousIp}/status', [StoreInteractionController::class, 'updateSuspiciousStatus'])->name('backend_store_interaction_suspicious_status');
         Route::get('store-interaction/blocked-ips', [StoreInteractionController::class, 'blockedIps'])->name('backend_store_interaction_blocked');

@@ -30,6 +30,7 @@ class SuspiciousIpDetectorTest extends TestCase
 
     protected function tearDown(): void
     {
+        Carbon::setTestNow();
         $this->cleanup();
         parent::tearDown();
     }
@@ -286,12 +287,12 @@ class SuspiciousIpDetectorTest extends TestCase
     public function test_continuous_f5_same_store_is_inspected(): void
     {
         $ip = self::PREFIX . '28';
-        $start = now()->subSeconds(24);
-        for ($i = 0; $i < 6; $i++) {
+        $start = now()->subSeconds(32);
+        for ($i = 0; $i < 5; $i++) {
             $this->addLog($ip, [
                 'store_id' => 10,
                 'referer' => 'https://example.com',
-                'created_at' => $start->copy()->addSeconds($i * 4),
+                'created_at' => $start->copy()->addSeconds($i * 8),
             ]);
         }
         $result = $this->detector->evaluate($ip, self::CHROME);
@@ -299,6 +300,28 @@ class SuspiciousIpDetectorTest extends TestCase
         $this->assertGreaterThanOrEqual(50, $result['score']);
         $this->detector->inspect($ip, self::CHROME);
         $this->assertSame(1, SuspiciousIp::query()->where('ip', $ip)->count());
+    }
+
+    public function test_real_world_f5_every_few_seconds_is_inspected(): void
+    {
+        $ip = self::PREFIX . '29';
+        Carbon::setTestNow(Carbon::parse('2026-10-31 17:22:10'));
+        $start = Carbon::parse('2026-10-31 17:21:05');
+        foreach ([0, 6, 10, 19, 24, 38, 48, 53, 65] as $offset) {
+            $this->addLog($ip, [
+                'store_id' => 10,
+                'referer' => 'https://example.com',
+                'created_at' => $start->copy()->addSeconds($offset),
+            ]);
+        }
+
+        $result = $this->detector->evaluate($ip, self::CHROME);
+        $this->assertContains('rapid_views', $result['reasons']);
+        $this->assertContains('repeat_same_url', $result['reasons']);
+        $this->assertGreaterThanOrEqual(50, $result['score']);
+        $this->detector->inspect($ip, self::CHROME);
+        $this->assertSame(1, SuspiciousIp::query()->where('ip', $ip)->count());
+        Carbon::setTestNow();
     }
 
     public function test_periodic_access(): void

@@ -28,7 +28,7 @@ class StoreController extends Controller
         $popular_stores = $clsStore->getPopularStores(21);
         $offers = Offer::getAllByStoreId($store->id);
         $best_offer = $offers['best_offer'] ?? new Offer();
-        app(StoreViewLogger::class)->queue($store, $request);
+        app(StoreViewLogger::class)->queue($store, $request, true);
         $store->increment('view_num');
 
         $store->how_to_apply = $store->how_to_apply ?: Setting::getStoreHowToApply($store->name);

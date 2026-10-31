@@ -78,33 +78,8 @@ class TrackingController extends Controller
         return response()->json(['status' => 'ok']);
     }
 
-    public function storeLeave(Request $request, StoreViewLogger $logger)
+    public function storeLeave()
     {
-        $validated = $request->validate([
-            'store_id' => 'required|integer',
-            'duration_seconds' => 'required|integer|min:0|max:7200',
-        ]);
-
-        $key = 'store-leave:' . $request->ip();
-        if (RateLimiter::tooManyAttempts($key, 60)) {
-            return response()->json(['status' => 'rate_limited'], 200);
-        }
-        RateLimiter::hit($key, 60);
-
-        $store = Store::query()->find($validated['store_id']);
-        if (!$store) {
-            return response()->json(['status' => 'ok']);
-        }
-
-        $logger->queue(
-            $store,
-            $request,
-            true,
-            'leave',
-            null,
-            (int) $validated['duration_seconds']
-        );
-
         return response()->json(['status' => 'ok']);
     }
 }

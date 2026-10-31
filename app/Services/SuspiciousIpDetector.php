@@ -183,7 +183,7 @@ class SuspiciousIpDetector
             $score += 20;
         }
 
-        $f5Since = $now->copy()->subSeconds((int) config('suspicious_ip.f5_seconds', 30));
+        $f5Since = $now->copy()->subSeconds((int) config('suspicious_ip.f5_seconds', 60));
         $rapidViewHits = $this->countTightIntervals(
             $this->eventTimes($ip, 'view', $burstSince),
             (int) config('suspicious_ip.rapid_view_seconds', 2)
@@ -191,7 +191,7 @@ class SuspiciousIpDetector
         $f5SameStore = $this->maxSameStoreViews($ip, $f5Since);
         if (
             $rapidViewHits >= (int) config('suspicious_ip.rapid_view_hits', 5)
-            || $f5SameStore >= (int) config('suspicious_ip.f5_hits', 6)
+            || $f5SameStore >= (int) config('suspicious_ip.f5_hits', 5)
         ) {
             $reasons[] = 'rapid_views';
             $score += 40;

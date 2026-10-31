@@ -20,9 +20,19 @@ class StoreViewLogger
         ?string $targetUrl = null,
         ?int $durationSeconds = null
     ): void {
+        if ($eventType === 'leave') {
+            return;
+        }
+
+        if ($eventType === 'view' && $this->isPrefetch($request)) {
+            return;
+        }
+
         $referer = substr((string) $request->headers->get('referer', ''), 0, 500);
         $gclid = $this->extractGoogleClickId($request);
         $fromGoogleAds = $this->isGoogleAdsRequest($request, $referer, $gclid);
+        $isOfferPopup = $eventType === 'view'
+            && ($request->filled('offer') || $request->filled('coupon'));
 
         $payload = [
             'store_id' => $store->id,
@@ -35,6 +45,7 @@ class StoreViewLogger
             'gclid' => $gclid,
             'from_google_ads' => $fromGoogleAds,
             'duration_seconds' => $durationSeconds,
+            'is_offer_popup' => $isOfferPopup,
         ];
 
         if ($immediate) {
@@ -54,9 +65,27 @@ class StoreViewLogger
         $eventType = $payload['event_type'] ?? 'view';
         $fromGoogleAds = (bool) ($payload['from_google_ads'] ?? false);
 
+        if ($eventType === 'leave') {
+            return;
+        }
+
+        if ($eventType === 'view' && $this->hasRecentEvent((int) $payload['store_id'], $ip, 'view', 3)) {
+            return;
+        }
+
+        if (
+            $eventType === 'view'
+            && !empty($payload['is_offer_popup'])
+            && $this->hasRecentEvent((int) $payload['store_id'], $ip, 'view', 15)
+        ) {
+            return;
+        }
+
         if (!$fromGoogleAds) {
             $fromGoogleAds = $this->ipHasRecentGoogleAds($ip);
         }
+
+        $country = ['country' => null, 'country_code' => null];
 
         try {
             $parsed = UserAgentParser::parse($userAgent);
@@ -79,15 +108,44 @@ class StoreViewLogger
                 'from_google_ads' => $fromGoogleAds,
                 'duration_seconds' => $payload['duration_seconds'] ?? null,
             ]);
+        } catch (Throwable) {
+            return;
+        }
 
+        try {
             app(SuspiciousIpDetector::class)->inspect(
                 $ip,
                 $userAgent ?: null,
                 $country['country'] ?? null
             );
-        } catch (Throwable) {
-            // Tracking must not affect the store page.
+        } catch (Throwable $e) {
+            report($e);
         }
+    }
+
+    private function isPrefetch(Request $request): bool
+    {
+        $purpose = strtolower(trim(implode(' ', array_filter([
+            (string) $request->headers->get('Sec-Purpose', ''),
+            (string) $request->headers->get('Purpose', ''),
+            (string) $request->headers->get('X-Moz', ''),
+        ]))));
+
+        return str_contains($purpose, 'prefetch') || str_contains($purpose, 'prerender');
+    }
+
+    private function hasRecentEvent(int $storeId, string $ip, string $eventType, int $withinSeconds): bool
+    {
+        if ($storeId < 1 || $ip === '' || $ip === '0.0.0.0') {
+            return false;
+        }
+
+        return StoreViewLog::query()
+            ->where('store_id', $storeId)
+            ->where('ip', $ip)
+            ->where('event_type', $eventType)
+            ->where('created_at', '>=', now()->subSeconds($withinSeconds))
+            ->exists();
     }
 
     private function extractGoogleClickId(Request $request): ?string

@@ -35,7 +35,9 @@ class StoreInteractionController extends Controller
             'to_date' => trim((string) $request->get('to_date')),
         ];
 
-        $query = StoreViewLog::query()->with('store:id,name,slug');
+        $query = StoreViewLog::query()
+            ->with('store:id,name,slug')
+            ->where('event_type', '!=', StoreViewLog::TYPE_LEAVE);
 
         if ($filter['keyword'] !== '') {
             $keyword = $filter['keyword'];
@@ -73,7 +75,10 @@ class StoreInteractionController extends Controller
             'total' => (clone $query)->count(),
             'unique_ip' => (int) (clone $query)->selectRaw('COUNT(DISTINCT ip) as aggregate')->value('aggregate'),
             'unique_store' => (int) (clone $query)->selectRaw('COUNT(DISTINCT store_id) as aggregate')->value('aggregate'),
-            'today' => StoreViewLog::whereDate('created_at', now()->toDateString())->count(),
+            'today' => StoreViewLog::query()
+                ->where('event_type', '!=', StoreViewLog::TYPE_LEAVE)
+                ->whereDate('created_at', now()->toDateString())
+                ->count(),
         ];
 
         $logs = $query->orderByDesc('id')->paginate(30)->withQueryString();
@@ -193,6 +198,26 @@ class StoreInteractionController extends Controller
         BlockedIp::forgetCache();
 
         return redirect()->back()->with('success', 'Đã gỡ chặn IP ' . $validated['ip_address']);
+    }
+
+    public function bulkDelete(Request $request)
+    {
+        $validated = $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'integer',
+        ]);
+
+        $ids = array_values(array_unique(array_map('intval', $validated['ids'])));
+        if ($ids === []) {
+            return $this->responseJsonBadRequest();
+        }
+
+        StoreViewLog::query()
+            ->whereIn('id', $ids)
+            ->where('event_type', '!=', StoreViewLog::TYPE_LEAVE)
+            ->delete();
+
+        return $this->responseJsonOk();
     }
 
     public function updateSuspiciousStatus(Request $request, SuspiciousIp $suspiciousIp)

@@ -53,6 +53,10 @@
 
             @include('backend.store_interaction._tabs', ['activeTab' => 'logs', 'suspiciousCount' => $suspiciousCount, 'blockedCount' => $blockedCount])
 
+            <div class="mb-2 text-right">
+                <x-forms.button-bulk-delete title="Xóa đã chọn" url="{{ route('backend_store_interaction_bulk_delete') }}"/>
+            </div>
+
             <div class="card">
                 <div class="card-body">
                     <form method="GET" action="{{ route('backend_store_interaction') }}" class="form-filter-top-index">
@@ -113,8 +117,13 @@
                     <table class="table table-hover table-grid-admin mb-0">
                         <thead>
                         <tr>
+                            <th width="1%">
+                                <div class="icheck-primary">
+                                    <input type="checkbox" class="checkall" id="store-log-checkall">
+                                    <label for="store-log-checkall"></label>
+                                </div>
+                            </th>
                             <th>Cửa hàng</th>
-                            <th>Loại</th>
                             <th>IP</th>
                             <th>Thiết bị</th>
                             <th>Trình duyệt</th>
@@ -128,22 +137,19 @@
                         @forelse($logs as $log)
                             <tr>
                                 <td>
+                                    <div class="icheck-primary">
+                                        <input type="checkbox" class="checker chk" id="store_log_chk_{{ $log->id }}"
+                                               value="{{ $log->id }}">
+                                        <label for="store_log_chk_{{ $log->id }}"></label>
+                                    </div>
+                                </td>
+                                <td>
                                     @if($log->store)
                                         <a href="{{ \App\Libs\Util::url_store($log->store) }}" target="_blank">
                                             {{ $log->store->name }}
                                         </a>
                                     @else
                                         {{ $log->store_name ?: ('#' . $log->store_id) }}
-                                    @endif
-                                </td>
-                                <td>
-                                    @if(($log->event_type ?? 'view') === 'affiliate_click')
-                                        <span class="badge badge-warning">Affiliate</span>
-                                    @else
-                                        <span class="badge badge-info">Xem store</span>
-                                    @endif
-                                    @if(!empty($log->from_google_ads))
-                                        <span class="badge badge-success">Google Ads</span>
                                     @endif
                                 </td>
                                 <td>
