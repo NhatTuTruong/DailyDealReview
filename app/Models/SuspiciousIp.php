@@ -13,6 +13,7 @@ class SuspiciousIp extends Model
         'burst_traffic' => 'Truy cập dày + tín hiệu phụ (không referer / nhiều store / bot)',
         'affiliate_spray' => 'Bấm nhiều URL affiliate liên tục',
         'rapid_clicks' => 'Click affiliate quá nhanh',
+        'rapid_views' => 'F5 liên tục cùng store',
         'click_without_view' => 'Click affiliate mà không xem trang',
         'bot_signature' => 'Dấu hiệu bot / scraper',
         'abnormal_ua' => 'User-Agent bất thường',

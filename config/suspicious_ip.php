@@ -15,6 +15,10 @@ return [
     'affiliate_unique_urls' => 8,
     'rapid_click_hits' => 5,
     'rapid_click_seconds' => 2,
+    'rapid_view_hits' => 5,
+    'rapid_view_seconds' => 2,
+    'f5_hits' => 6,
+    'f5_seconds' => 30,
 
     'no_interaction_views' => 15,
     'no_interaction_minutes' => 10,

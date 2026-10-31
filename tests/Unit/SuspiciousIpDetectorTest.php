@@ -261,6 +261,44 @@ class SuspiciousIpDetectorTest extends TestCase
         $result = $this->detector->evaluate($ip, self::CHROME);
         $this->assertContains('repeat_same_url', $result['reasons']);
         $this->assertNotContains('burst_traffic', $result['reasons']);
+        $this->assertNotContains('rapid_views', $result['reasons']);
+    }
+
+    public function test_rapid_page_views_same_store_is_inspected(): void
+    {
+        $ip = self::PREFIX . '27';
+        $start = now()->subSeconds(20);
+        for ($i = 0; $i < 8; $i++) {
+            $this->addLog($ip, [
+                'store_id' => 10,
+                'referer' => 'https://example.com',
+                'created_at' => $start->copy()->addSeconds($i),
+            ]);
+        }
+        $result = $this->detector->evaluate($ip, self::CHROME);
+        $this->assertContains('rapid_views', $result['reasons']);
+        $this->assertContains('repeat_same_url', $result['reasons']);
+        $this->assertGreaterThanOrEqual(50, $result['score']);
+        $this->detector->inspect($ip, self::CHROME);
+        $this->assertSame(1, SuspiciousIp::query()->where('ip', $ip)->count());
+    }
+
+    public function test_continuous_f5_same_store_is_inspected(): void
+    {
+        $ip = self::PREFIX . '28';
+        $start = now()->subSeconds(24);
+        for ($i = 0; $i < 6; $i++) {
+            $this->addLog($ip, [
+                'store_id' => 10,
+                'referer' => 'https://example.com',
+                'created_at' => $start->copy()->addSeconds($i * 4),
+            ]);
+        }
+        $result = $this->detector->evaluate($ip, self::CHROME);
+        $this->assertContains('rapid_views', $result['reasons']);
+        $this->assertGreaterThanOrEqual(50, $result['score']);
+        $this->detector->inspect($ip, self::CHROME);
+        $this->assertSame(1, SuspiciousIp::query()->where('ip', $ip)->count());
     }
 
     public function test_periodic_access(): void
@@ -318,6 +356,7 @@ class SuspiciousIpDetectorTest extends TestCase
         $this->assertNotContains('burst_traffic', $result['reasons']);
         $this->assertNotContains('no_interaction', $result['reasons']);
         $this->assertNotContains('periodic_access', $result['reasons']);
+        $this->assertNotContains('rapid_views', $result['reasons']);
         $this->detector->inspect($ip, self::CHROME);
         $this->assertSame(0, SuspiciousIp::query()->where('ip', $ip)->count());
     }

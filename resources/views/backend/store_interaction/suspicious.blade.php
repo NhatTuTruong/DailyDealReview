@@ -26,7 +26,7 @@
                         </select>
                     </form>
                     <p class="text-muted mb-0 mt-2">
-                        Có bắt click liên tục của người thật (click deal quá nhanh).
+                        Có bắt click deal quá nhanh và F5 liên tục cùng store (≤ 2 giây/lần, hoặc ≥ 6 lần / 30 giây).
                         Thêm: vào Ads ≥ 3 lần/10 phút, thoát &lt; 5 giây nhiều lần (không bấm deal),
                         lặp cùng store, UA không hợp lệ, nhịp truy cập đều như bot, xem nhiều brand.
                         AdsBot Google không bị gắn cờ. Khách ads thật chỉ vào tab khi điểm ≥ 55.

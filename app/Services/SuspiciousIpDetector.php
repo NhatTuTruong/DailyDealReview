@@ -177,18 +177,24 @@ class SuspiciousIpDetector
         }
 
         $repeatSince = $now->copy()->subMinutes((int) config('suspicious_ip.repeat_same_url_minutes', 10));
-        $maxSameStoreRow = StoreViewLog::query()
-            ->where('ip', $ip)
-            ->where('event_type', 'view')
-            ->where('created_at', '>=', $repeatSince)
-            ->selectRaw('COUNT(*) as aggregate')
-            ->groupBy('store_id')
-            ->orderByDesc('aggregate')
-            ->first();
-        $maxSameStore = (int) ($maxSameStoreRow?->aggregate ?? 0);
+        $maxSameStore = $this->maxSameStoreViews($ip, $repeatSince);
         if ($maxSameStore >= (int) config('suspicious_ip.repeat_same_url_hits', 4)) {
             $reasons[] = 'repeat_same_url';
             $score += 20;
+        }
+
+        $f5Since = $now->copy()->subSeconds((int) config('suspicious_ip.f5_seconds', 30));
+        $rapidViewHits = $this->countTightIntervals(
+            $this->eventTimes($ip, 'view', $burstSince),
+            (int) config('suspicious_ip.rapid_view_seconds', 2)
+        );
+        $f5SameStore = $this->maxSameStoreViews($ip, $f5Since);
+        if (
+            $rapidViewHits >= (int) config('suspicious_ip.rapid_view_hits', 5)
+            || $f5SameStore >= (int) config('suspicious_ip.f5_hits', 6)
+        ) {
+            $reasons[] = 'rapid_views';
+            $score += 40;
         }
 
         $periodicSince = $now->copy()->subMinutes((int) config('suspicious_ip.periodic_minutes', 10));
@@ -364,6 +370,20 @@ class SuspiciousIpDetector
         $stddev = sqrt($variance / count($intervals));
 
         return $stddev <= max(1.0, $mean * 0.15);
+    }
+
+    private function maxSameStoreViews(string $ip, Carbon $since): int
+    {
+        $row = StoreViewLog::query()
+            ->where('ip', $ip)
+            ->where('event_type', 'view')
+            ->where('created_at', '>=', $since)
+            ->selectRaw('COUNT(*) as aggregate')
+            ->groupBy('store_id')
+            ->orderByDesc('aggregate')
+            ->first();
+
+        return (int) ($row?->aggregate ?? 0);
     }
 
     private function countEvents(string $ip, string $eventType, Carbon $since): int
