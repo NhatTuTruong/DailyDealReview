@@ -178,6 +178,7 @@ class StoreInteractionController extends Controller
                 'created_by' => Auth::id(),
             ]
         );
+        BlockedIp::forgetCache();
 
         return redirect()->back()->with('success', 'Đã chặn IP ' . $ip);
     }
@@ -188,7 +189,8 @@ class StoreInteractionController extends Controller
             'ip_address' => 'required|ip',
         ]);
 
-        BlockedIp::query()->where('ip', $validated['ip_address'])->delete();
+        BlockedIp::query()->where('ip', $validated['ip_address'])->get()->each->delete();
+        BlockedIp::forgetCache();
 
         return redirect()->back()->with('success', 'Đã gỡ chặn IP ' . $validated['ip_address']);
     }
