@@ -35,6 +35,8 @@ Route::localized(function () {
     Route::get('store/{slug}', [StoreController::class, 'index'])->where(['slug' => '[a-z0-9\-]+'])->name('store_detail');
 
     Route::post('/api/record', [TrackingController::class, 'trackingFootprint']);
+    Route::post('/api/store-click', [TrackingController::class, 'storeClick'])->name('api_store_click');
+    Route::post('/api/store-leave', [TrackingController::class, 'storeLeave'])->name('api_store_leave');
 
     Route::get('{slug}-n{id}.html', [PostController::class, 'detail'])->where(['slug' => '[a-z0-9\-]+', 'id' => '[0-9]+'])->name('post_detail');
     Route::get('tag/{tag}', [PostController::class, 'tag'])->where(['tag' => '[a-z0-9\-]+'])->name('post_tag');

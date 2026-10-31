@@ -27,6 +27,11 @@ return [
                     'route' => 'backend_store',
                     'title' => 'Store',
                 ],
+                'store_interaction' => [
+                    'icon' => 'fas fa-chart-bar',
+                    'route' => 'backend_store_interaction',
+                    'title' => 'Thống kê tương tác',
+                ],
                 'offer' => [
                     'icon' => 'fas fa-tags',
                     'route' => 'backend_offer',

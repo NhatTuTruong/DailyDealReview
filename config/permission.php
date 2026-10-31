@@ -30,6 +30,9 @@ return [
             'clone' => 'Nhân bản',
         ]
     ],
+    'store_interaction' => [
+        'label' => 'Thống kê tương tác'
+    ],
     'offer' => [
         'label' => 'Offer',
         'items' => [

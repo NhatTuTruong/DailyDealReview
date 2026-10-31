@@ -342,10 +342,61 @@
             })
         });
 
+        const storePageStartedAt = Date.now();
+        let storeClickedDeal = false;
+        let storeLeaveSent = false;
+
+        function csrfHeaders() {
+            const token = document.querySelector('meta[name="csrf-token"]');
+            return {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': token ? token.getAttribute('content') : '',
+                'Accept': 'application/json'
+            };
+        }
+
+        function sendStoreLeave() {
+            if (storeLeaveSent || storeClickedDeal) {
+                return;
+            }
+            storeLeaveSent = true;
+            const duration = Math.max(0, Math.round((Date.now() - storePageStartedAt) / 1000));
+            fetch('{{ route('api_store_leave') }}', {
+                method: 'POST',
+                headers: csrfHeaders(),
+                body: JSON.stringify({
+                    store_id: {{ (int) $store->id }},
+                    duration_seconds: duration
+                }),
+                keepalive: true
+            }).catch(function () {});
+        }
+
+        document.addEventListener('visibilitychange', function () {
+            if (document.visibilityState === 'hidden') {
+                sendStoreLeave();
+            }
+        });
+        window.addEventListener('pagehide', sendStoreLeave);
+
+        function logAffiliateClick(url) {
+            storeClickedDeal = true;
+            fetch('{{ route('api_store_click') }}', {
+                method: 'POST',
+                headers: csrfHeaders(),
+                body: JSON.stringify({
+                    store_id: {{ (int) $store->id }},
+                    url: url || ''
+                }),
+                keepalive: true
+            }).catch(function () {});
+        }
+
         function handleClickOffer(event) {
             event.preventDefault();
             const affiliateUrl = this.getAttribute('data-affiliate_url');
             const offerUrl = this.getAttribute('data-url');
+            logAffiliateClick(affiliateUrl);
             window.open(offerUrl, '_blank');
             window.location.href = affiliateUrl;
         }
@@ -361,6 +412,7 @@
 
                     let affiliateUrl = "{{ $best_offer->url }}";
                     let offerUrl = "{{ $store->getUrl() }}?offer={{ $best_offer->id }}";
+                    logAffiliateClick(affiliateUrl);
                     window.open(offerUrl, '_blank');
                     window.location.href = affiliateUrl;
 

@@ -39,6 +39,11 @@ class Store extends Model
         return $this->hasMany(Offer::class);
     }
 
+    public function viewLogs()
+    {
+        return $this->hasMany(StoreViewLog::class);
+    }
+
     protected static function boot()
     {
         parent::boot();

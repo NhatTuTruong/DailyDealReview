@@ -6,6 +6,7 @@ use App\Libs\Util;
 use App\Models\Category;
 use App\Models\Offer;
 use App\Models\Store;
+use App\Services\StoreViewLogger;
 use Illuminate\Http\Request;
 use App\Models\Setting;
 use Illuminate\Support\Facades\App;
@@ -27,6 +28,7 @@ class StoreController extends Controller
         $popular_stores = $clsStore->getPopularStores(21);
         $offers = Offer::getAllByStoreId($store->id);
         $best_offer = $offers['best_offer'] ?? new Offer();
+        app(StoreViewLogger::class)->queue($store, $request);
         $store->increment('view_num');
 
         $store->how_to_apply = $store->how_to_apply ?: Setting::getStoreHowToApply($store->name);

@@ -16,6 +16,8 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
 //        $middleware->redirectGuestsTo('/backend/login');
 //        $middleware->append(MemberAuth::class);
+        $middleware->appendToGroup('web', \App\Http\Middleware\BlockBlockedIp::class);
+        $middleware->appendToGroup('api', \App\Http\Middleware\BlockBlockedIp::class);
         $middleware->alias([
             'member_auth' => MemberAuth::class,
             'affiliate.key' => \App\Http\Middleware\AffiliateApiKey::class,

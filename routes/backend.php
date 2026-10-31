@@ -15,6 +15,7 @@ use App\Http\Controllers\Backend\SettingController;
 use App\Http\Controllers\Backend\WidgetController;
 use App\Http\Controllers\Backend\UserController;
 use App\Http\Controllers\Backend\GroupController;
+use App\Http\Controllers\Backend\StoreInteractionController;
 use Illuminate\Support\Facades\Route;
 
 Route::localized(function () {
@@ -94,6 +95,13 @@ Route::localized(function () {
             Route::post('/export', [StoreController::class, 'export'])->name('backend_store_export');
 
         });
+
+        Route::get('store-interaction', [StoreInteractionController::class, 'index'])->name('backend_store_interaction');
+        Route::get('store-interaction/suspicious', [StoreInteractionController::class, 'suspicious'])->name('backend_store_interaction_suspicious');
+        Route::post('store-interaction/suspicious/{suspiciousIp}/status', [StoreInteractionController::class, 'updateSuspiciousStatus'])->name('backend_store_interaction_suspicious_status');
+        Route::get('store-interaction/blocked-ips', [StoreInteractionController::class, 'blockedIps'])->name('backend_store_interaction_blocked');
+        Route::post('store-interaction/blocked-ips', [StoreInteractionController::class, 'blockIp'])->name('backend_store_interaction_block_ip');
+        Route::post('store-interaction/blocked-ips/unblock', [StoreInteractionController::class, 'unblockIp'])->name('backend_store_interaction_unblock_ip');
 
         Route::prefix('offer')->group(function () {
             Route::get('/', [OfferController::class, 'index'])->name('backend_offer');

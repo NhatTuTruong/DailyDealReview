@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Libs\Util;
+use App\Models\Store;
 use App\Models\TrackingFootPrint;
+use App\Services\StoreViewLogger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 
@@ -47,5 +49,62 @@ class TrackingController extends Controller
         return response()->json(['status' => 'ok']);
     }
 
+    public function storeClick(Request $request, StoreViewLogger $logger)
+    {
+        $validated = $request->validate([
+            'store_id' => 'required|integer',
+            'url' => 'nullable|string|max:500',
+        ]);
 
+        $key = 'store-click:' . $request->ip();
+        if (RateLimiter::tooManyAttempts($key, 60)) {
+            return response()->json(['status' => 'rate_limited'], 200);
+        }
+        RateLimiter::hit($key, 60);
+
+        $store = Store::query()->find($validated['store_id']);
+        if (!$store) {
+            return response()->json(['status' => 'ok']);
+        }
+
+        $logger->queue(
+            $store,
+            $request,
+            true,
+            'affiliate_click',
+            $validated['url'] ?? null
+        );
+
+        return response()->json(['status' => 'ok']);
+    }
+
+    public function storeLeave(Request $request, StoreViewLogger $logger)
+    {
+        $validated = $request->validate([
+            'store_id' => 'required|integer',
+            'duration_seconds' => 'required|integer|min:0|max:7200',
+        ]);
+
+        $key = 'store-leave:' . $request->ip();
+        if (RateLimiter::tooManyAttempts($key, 60)) {
+            return response()->json(['status' => 'rate_limited'], 200);
+        }
+        RateLimiter::hit($key, 60);
+
+        $store = Store::query()->find($validated['store_id']);
+        if (!$store) {
+            return response()->json(['status' => 'ok']);
+        }
+
+        $logger->queue(
+            $store,
+            $request,
+            true,
+            'leave',
+            null,
+            (int) $validated['duration_seconds']
+        );
+
+        return response()->json(['status' => 'ok']);
+    }
 }
