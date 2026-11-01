@@ -33,6 +33,7 @@ class StoreViewLogger
         $fromGoogleAds = $this->isGoogleAdsRequest($request, $referer, $gclid);
         $isOfferPopup = $eventType === 'view'
             && ($request->filled('offer') || $request->filled('coupon'));
+        $storePath = (string) (parse_url($store->getUrl(), PHP_URL_PATH) ?: '');
 
         $payload = [
             'store_id' => $store->id,
@@ -46,6 +47,7 @@ class StoreViewLogger
             'from_google_ads' => $fromGoogleAds,
             'duration_seconds' => $durationSeconds,
             'is_offer_popup' => $isOfferPopup,
+            'store_path' => $storePath,
         ];
 
         if ($immediate) {
@@ -69,15 +71,24 @@ class StoreViewLogger
             return;
         }
 
-        if ($eventType === 'view' && $this->hasRecentEvent((int) $payload['store_id'], $ip, 'view', 3)) {
+        $storeId = (int) $payload['store_id'];
+
+        if ($eventType === 'view' && $this->hasRecentEvent($storeId, $ip, 'view', 3)) {
             return;
         }
 
         if (
             $eventType === 'view'
             && !empty($payload['is_offer_popup'])
-            && $this->hasRecentEvent((int) $payload['store_id'], $ip, 'view', 15)
+            && (
+                $this->refererIsSameStore($payload['referer'] ?? null, $payload['store_path'] ?? null)
+                || $this->hasRecentEvent($storeId, $ip, 'view', 1800)
+            )
         ) {
+            return;
+        }
+
+        if ($eventType === 'view' && !$this->acquireViewLock($storeId, $ip)) {
             return;
         }
 
@@ -132,6 +143,27 @@ class StoreViewLogger
         ]))));
 
         return str_contains($purpose, 'prefetch') || str_contains($purpose, 'prerender');
+    }
+
+    private function acquireViewLock(int $storeId, string $ip): bool
+    {
+        if ($storeId < 1 || $ip === '' || $ip === '0.0.0.0') {
+            return true;
+        }
+
+        return Cache::add('store_view_lock:' . $ip . ':' . $storeId, 1, 3);
+    }
+
+    private function refererIsSameStore(?string $referer, ?string $storePath): bool
+    {
+        if (!$referer || !$storePath) {
+            return false;
+        }
+
+        $refererPath = rtrim((string) (parse_url($referer, PHP_URL_PATH) ?: ''), '/');
+        $storePath = rtrim($storePath, '/');
+
+        return $storePath !== '' && ($refererPath === $storePath || str_ends_with($refererPath, $storePath));
     }
 
     private function hasRecentEvent(int $storeId, string $ip, string $eventType, int $withinSeconds): bool

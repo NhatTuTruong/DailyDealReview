@@ -6,6 +6,7 @@ use App\Models\StoreViewLog;
 use App\Services\StoreViewLogger;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
@@ -20,6 +21,7 @@ class StoreViewLoggerTest extends TestCase
     {
         parent::setUp();
         $this->ensureTables();
+        Cache::flush();
         $this->logger = app(StoreViewLogger::class);
         StoreViewLog::query()->where('ip', self::IP)->delete();
     }
@@ -63,7 +65,31 @@ class StoreViewLoggerTest extends TestCase
     public function test_offer_popup_after_view_is_not_a_second_view(): void
     {
         $this->logger->record($this->payload('view'));
+        Cache::flush();
         $this->logger->record($this->payload('view', ['is_offer_popup' => true]));
+
+        $this->assertSame(1, StoreViewLog::query()->where('ip', self::IP)->where('event_type', 'view')->count());
+    }
+
+    public function test_offer_popup_from_same_store_referer_is_not_a_view(): void
+    {
+        $this->logger->record($this->payload('view', [
+            'is_offer_popup' => true,
+            'referer' => 'https://example.test/store/nhat',
+            'store_path' => '/store/nhat',
+        ]));
+
+        $this->assertSame(0, StoreViewLog::query()->where('ip', self::IP)->count());
+    }
+
+    public function test_first_offer_landing_from_google_is_still_a_view(): void
+    {
+        $this->logger->record($this->payload('view', [
+            'is_offer_popup' => true,
+            'from_google_ads' => true,
+            'referer' => 'https://google.com/aclk',
+            'store_path' => '/store/nhat',
+        ]));
 
         $this->assertSame(1, StoreViewLog::query()->where('ip', self::IP)->where('event_type', 'view')->count());
     }
