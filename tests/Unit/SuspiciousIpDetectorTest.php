@@ -422,6 +422,42 @@ class SuspiciousIpDetectorTest extends TestCase
         $this->assertSame(1, SuspiciousIp::query()->where('ip', $ip)->count());
     }
 
+    public function test_store_names_preview_caps_at_ten(): void
+    {
+        $this->assertSame('-', SuspiciousIp::formatStoreNames([]));
+        $this->assertSame('-', SuspiciousIp::formatStoreNames(['', null]));
+        $this->assertSame('Nike, Adidas', SuspiciousIp::formatStoreNames(['Nike', 'Adidas']));
+        $this->assertSame(
+            'A, B, C, D, E, F, G, H, I, J',
+            SuspiciousIp::formatStoreNames(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'])
+        );
+        $this->assertSame(
+            'A, B, C, D, E, F, G, H, I, J ...',
+            SuspiciousIp::formatStoreNames(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K'])
+        );
+    }
+
+    public function test_inspect_saves_store_names_most_recent_first(): void
+    {
+        $ip = self::PREFIX . '40';
+        $names = ['Nike', 'Adidas', 'Puma', 'Reebok', 'Asics', 'New Balance'];
+        foreach ($names as $i => $name) {
+            $this->addLog($ip, [
+                'store_id' => $i + 1,
+                'store_name' => $name,
+                'created_at' => now()->subMinutes(2)->addSeconds($i),
+            ]);
+        }
+
+        $this->detector->inspect($ip, 'curl/8.4.0');
+        $row = SuspiciousIp::query()->where('ip', $ip)->first();
+
+        $this->assertNotNull($row);
+        $this->assertSame(6, $row->unique_store_count);
+        $this->assertSame(array_reverse($names), $row->store_names);
+        $this->assertSame('New Balance, Asics, Reebok, Puma, Adidas, Nike', $row->storeNamesLabel());
+    }
+
     private function addLog(string $ip, array $over = []): void
     {
         $createdAt = $over['created_at'] ?? now();
@@ -477,6 +513,12 @@ class SuspiciousIpDetectorTest extends TestCase
             });
         }
 
+        if (Schema::hasTable('suspicious_ips') && !Schema::hasColumn('suspicious_ips', 'store_names')) {
+            Schema::table('suspicious_ips', function (Blueprint $table) {
+                $table->json('store_names')->nullable();
+            });
+        }
+
         if (!Schema::hasTable('suspicious_ips')) {
             Schema::create('suspicious_ips', function (Blueprint $table) {
                 $table->id();
@@ -486,6 +528,7 @@ class SuspiciousIpDetectorTest extends TestCase
                 $table->unsignedInteger('view_count_window')->default(0);
                 $table->unsignedInteger('affiliate_count_window')->default(0);
                 $table->unsignedInteger('unique_store_count')->default(0);
+                $table->json('store_names')->nullable();
                 $table->string('country')->nullable();
                 $table->text('last_user_agent')->nullable();
                 $table->string('status', 20)->default('open');

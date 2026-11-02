@@ -61,11 +61,20 @@
                 <div class="card-body">
                     <form method="GET" action="{{ route('backend_store_interaction') }}" class="form-filter-top-index">
                         <div class="row">
-                            <div class="col-md-2">
+                            <div class="col-md-2 col-sm-6 mb-2">
+                                <select name="visitor" class="form-control" onchange="this.form.submit()">
+                                    @foreach(\App\Models\StoreViewLog::VISITOR_LABELS as $value => $label)
+                                        <option value="{{ $value }}" @selected($filter['visitor'] === $value)>
+                                            {{ $label }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-3 col-sm-6 mb-2">
                                 <input type="text" name="keyword" class="form-control"
                                        value="{{ $filter['keyword'] }}" placeholder="IP, cửa hàng, trình duyệt...">
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-md-3 col-sm-6 mb-2">
                                 <select name="store_id" class="form-control" onchange="this.form.submit()">
                                     <option value="0">Tất cả cửa hàng</option>
                                     @foreach($stores as $store)
@@ -75,7 +84,7 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-md-2 col-sm-6 mb-2">
                                 <select name="device" class="form-control" onchange="this.form.submit()">
                                     <option value="">Tất cả thiết bị</option>
                                     @foreach($devices as $device)
@@ -85,7 +94,7 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-md-2 col-sm-6 mb-2">
                                 <select name="country" class="form-control" onchange="this.form.submit()">
                                     <option value="">Tất cả quốc gia</option>
                                     @foreach($countries as $country)
@@ -95,16 +104,16 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-md-2 col-sm-6 mb-2">
                                 <input type="date" name="from_date" class="form-control"
-                                       value="{{ $filter['from_date'] }}">
+                                       value="{{ $filter['from_date'] }}" title="Từ ngày">
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-md-2 col-sm-6 mb-2">
                                 <input type="date" name="to_date" class="form-control"
-                                       value="{{ $filter['to_date'] }}">
+                                       value="{{ $filter['to_date'] }}" title="Đến ngày">
                             </div>
-                            <div class="col-md-12 mt-2">
-                                <button type="submit" class="btn btn-primary btn-sm">Lọc</button>
+                            <div class="col-md-8 col-sm-12 mb-2 d-flex align-items-center">
+                                <button type="submit" class="btn btn-primary btn-sm mr-1">Lọc</button>
                                 <a href="{{ route('backend_store_interaction') }}" class="btn btn-default btn-sm">Xóa lọc</a>
                             </div>
                         </div>
@@ -131,6 +140,7 @@
                             <th>Quốc gia</th>
                             <th>User Agent</th>
                             <th>Thời gian</th>
+                            <th></th>
                         </tr>
                         </thead>
                         <tbody>
@@ -174,10 +184,28 @@
                                     <small title="{{ $log->user_agent }}">{{ $log->user_agent ?: '-' }}</small>
                                 </td>
                                 <td nowrap>{{ optional($log->created_at)->format('d-m-Y H:i:s') }}</td>
+                                <td nowrap>
+                                    @if($log->ip)
+                                        @if(in_array($log->ip, $blockedIps, true))
+                                            <form method="POST" action="{{ route('backend_store_interaction_unblock_ip') }}" class="d-inline">
+                                                @csrf
+                                                <input type="hidden" name="ip_address" value="{{ $log->ip }}">
+                                                <button type="submit" class="btn btn-sm btn-success">Gỡ chặn</button>
+                                            </form>
+                                        @else
+                                            <form method="POST" action="{{ route('backend_store_interaction_block_ip') }}" class="d-inline">
+                                                @csrf
+                                                <input type="hidden" name="ip_address" value="{{ $log->ip }}">
+                                                <input type="hidden" name="note" value="Chặn từ lượt xem">
+                                                <button type="submit" class="btn btn-sm btn-danger">Chặn IP</button>
+                                            </form>
+                                        @endif
+                                    @endif
+                                </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="9" class="text-center p-4">Chưa có lượt xem store nào.</td>
+                                <td colspan="10" class="text-center p-4">Chưa có lượt xem store nào.</td>
                             </tr>
                         @endforelse
                         </tbody>

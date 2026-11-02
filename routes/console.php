@@ -11,3 +11,6 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('store:capture-view-snapshot')->dailyAt('23:55');
+Schedule::command('store-views:cleanup')
+    ->weeklyOn(1, '01:10')
+    ->when(fn () => (bool) config('store_view_log.cleanup_enabled'));

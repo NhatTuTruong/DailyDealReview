@@ -23,6 +23,16 @@ class StoreViewLog extends Model
         self::TYPE_LEAVE => 'badge-secondary',
     ];
 
+    public const VISITOR_HUMAN = 'human';
+    public const VISITOR_BOT = 'bot';
+    public const VISITOR_ALL = 'all';
+
+    public const VISITOR_LABELS = [
+        self::VISITOR_HUMAN => 'Người dùng',
+        self::VISITOR_BOT => 'Bot',
+        self::VISITOR_ALL => 'Tất cả',
+    ];
+
     protected $fillable = [
         'store_id',
         'store_name',
@@ -51,6 +61,21 @@ class StoreViewLog extends Model
     public function store(): BelongsTo
     {
         return $this->belongsTo(Store::class);
+    }
+
+    public function scopeVisitor($query, string $visitor)
+    {
+        if ($visitor === self::VISITOR_BOT) {
+            return $query->where('device', 'Bot');
+        }
+
+        if ($visitor === self::VISITOR_ALL) {
+            return $query;
+        }
+
+        return $query->where(function ($q) {
+            $q->whereNull('device')->orWhere('device', '<>', 'Bot');
+        });
     }
 
     public function eventTypeLabel(): string

@@ -112,6 +112,52 @@ class StoreViewLoggerTest extends TestCase
         $this->assertSame(0, StoreViewLog::query()->where('ip', self::IP)->count());
     }
 
+    public function test_googlebot_is_logged_as_bot_device(): void
+    {
+        $this->logger->record($this->payload('view', [
+            'user_agent' => 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
+        ]));
+
+        $row = StoreViewLog::query()->where('ip', self::IP)->first();
+        $this->assertNotNull($row);
+        $this->assertSame('Bot', $row->device);
+        $this->assertSame(1, StoreViewLog::query()->where('ip', self::IP)->visitor(StoreViewLog::VISITOR_BOT)->count());
+        $this->assertSame(0, StoreViewLog::query()->where('ip', self::IP)->visitor(StoreViewLog::VISITOR_HUMAN)->count());
+    }
+
+    public function test_visitor_scope_separates_humans_and_bots(): void
+    {
+        StoreViewLog::create([
+            'store_id' => 80,
+            'store_name' => 'Test10',
+            'event_type' => 'view',
+            'ip' => self::IP,
+            'device' => 'Desktop',
+            'user_agent' => self::CHROME,
+        ]);
+        StoreViewLog::create([
+            'store_id' => 80,
+            'store_name' => 'Test10',
+            'event_type' => 'view',
+            'ip' => self::IP,
+            'device' => 'Bot',
+            'user_agent' => 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
+        ]);
+        StoreViewLog::create([
+            'store_id' => 80,
+            'store_name' => 'Test10',
+            'event_type' => 'view',
+            'ip' => self::IP,
+            'device' => null,
+            'user_agent' => '',
+        ]);
+
+        $this->assertSame(2, StoreViewLog::query()->where('ip', self::IP)->visitor(StoreViewLog::VISITOR_HUMAN)->count());
+        $this->assertSame(1, StoreViewLog::query()->where('ip', self::IP)->visitor(StoreViewLog::VISITOR_BOT)->count());
+        $this->assertSame(3, StoreViewLog::query()->where('ip', self::IP)->visitor(StoreViewLog::VISITOR_ALL)->count());
+        $this->assertSame(2, StoreViewLog::query()->where('ip', self::IP)->visitor('unknown')->count());
+    }
+
     public function test_leave_queue_does_not_write(): void
     {
         $this->logger->record($this->payload('leave', ['duration_seconds' => 1]));

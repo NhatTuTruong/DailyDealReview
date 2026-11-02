@@ -65,7 +65,7 @@
                                 </td>
                                 <td>{{ $item->view_count_window }}</td>
                                 <td>{{ $item->affiliate_count_window }}</td>
-                                <td>{{ $item->unique_store_count }}</td>
+                                <td style="min-width: 220px; max-width: 280px; white-space: normal;">{{ $item->storeNamesLabel() }}</td>
                                 <td>{{ $item->country ?: '-' }}</td>
                                 <td style="max-width: 240px; word-break: break-all;">
                                     <small title="{{ $item->last_user_agent }}">{{ $item->last_user_agent ?: '-' }}</small>

@@ -38,6 +38,7 @@ class SuspiciousIpDetector
             'view_count_window' => $result['view_count_window'],
             'affiliate_count_window' => $result['affiliate_count_window'],
             'unique_store_count' => $result['unique_store_count'],
+            'store_names' => $result['store_names'],
             'country' => $country,
             'last_user_agent' => $userAgent,
             'last_detected_at' => $now,
@@ -221,6 +222,7 @@ class SuspiciousIpDetector
             'view_count_window' => $viewsInBurst,
             'affiliate_count_window' => $affiliateHits,
             'unique_store_count' => $uniqueStores,
+            'store_names' => $this->distinctStoreNames($ip, $idleSince),
             'from_google_ads' => $fromGoogleAds,
         ];
     }
@@ -288,6 +290,22 @@ class SuspiciousIpDetector
             ->where('created_at', '>=', $since)
             ->selectRaw('COUNT(DISTINCT store_id) as aggregate')
             ->value('aggregate');
+    }
+
+    private function distinctStoreNames(string $ip, Carbon $since, int $limit = 20): array
+    {
+        return StoreViewLog::query()
+            ->where('ip', $ip)
+            ->where('event_type', 'view')
+            ->where('created_at', '>=', $since)
+            ->whereNotNull('store_name')
+            ->where('store_name', '<>', '')
+            ->orderByDesc('id')
+            ->pluck('store_name')
+            ->unique()
+            ->take($limit)
+            ->values()
+            ->all();
     }
 
     private function countShortBounces(string $ip, Carbon $since): int

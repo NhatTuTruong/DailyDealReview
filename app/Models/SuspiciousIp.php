@@ -33,6 +33,7 @@ class SuspiciousIp extends Model
         'view_count_window',
         'affiliate_count_window',
         'unique_store_count',
+        'store_names',
         'country',
         'last_user_agent',
         'status',
@@ -44,9 +45,34 @@ class SuspiciousIp extends Model
     {
         return [
             'reasons' => 'array',
+            'store_names' => 'array',
             'first_detected_at' => 'datetime',
             'last_detected_at' => 'datetime',
         ];
+    }
+
+    public static function formatStoreNames(?array $names, int $limit = 10): string
+    {
+        $names = array_values(array_unique(array_filter(
+            $names ?? [],
+            fn ($name) => is_string($name) && trim($name) !== ''
+        )));
+
+        if ($names === []) {
+            return '-';
+        }
+
+        $label = implode(', ', array_slice($names, 0, $limit));
+        if (count($names) > $limit) {
+            $label .= ' ...';
+        }
+
+        return $label;
+    }
+
+    public function storeNamesLabel(int $limit = 10): string
+    {
+        return self::formatStoreNames($this->store_names, $limit);
     }
 
     public function reasonLabels(): array

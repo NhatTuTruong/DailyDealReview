@@ -26,7 +26,13 @@ class StoreInteractionController extends Controller
 
     public function index(Request $request)
     {
+        $visitor = trim((string) $request->get('visitor', StoreViewLog::VISITOR_HUMAN));
+        if (!array_key_exists($visitor, StoreViewLog::VISITOR_LABELS)) {
+            $visitor = StoreViewLog::VISITOR_HUMAN;
+        }
+
         $filter = [
+            'visitor' => $visitor,
             'keyword' => trim((string) $request->get('keyword')),
             'store_id' => (int) $request->get('store_id', 0),
             'device' => trim((string) $request->get('device')),
@@ -37,7 +43,8 @@ class StoreInteractionController extends Controller
 
         $query = StoreViewLog::query()
             ->with('store:id,name,slug')
-            ->where('event_type', '!=', StoreViewLog::TYPE_LEAVE);
+            ->where('event_type', '!=', StoreViewLog::TYPE_LEAVE)
+            ->visitor($filter['visitor']);
 
         if ($filter['keyword'] !== '') {
             $keyword = $filter['keyword'];
@@ -77,6 +84,7 @@ class StoreInteractionController extends Controller
             'unique_store' => (int) (clone $query)->selectRaw('COUNT(DISTINCT store_id) as aggregate')->value('aggregate'),
             'today' => StoreViewLog::query()
                 ->where('event_type', '!=', StoreViewLog::TYPE_LEAVE)
+                ->visitor($filter['visitor'])
                 ->whereDate('created_at', now()->toDateString())
                 ->count(),
         ];
@@ -91,6 +99,7 @@ class StoreInteractionController extends Controller
 
         $devices = StoreViewLog::query()
             ->whereNotNull('device')
+            ->where('device', '<>', 'Bot')
             ->distinct()
             ->orderBy('device')
             ->pluck('device');
@@ -107,6 +116,7 @@ class StoreInteractionController extends Controller
             ->pluck('ip')
             ->all();
         $suspiciousCount = SuspiciousIp::query()->where('status', SuspiciousIp::STATUS_OPEN)->count();
+        $blockedIps = BlockedIp::cachedList();
         $blockedCount = BlockedIp::query()->count();
 
         return view('backend.store_interaction.index', compact(
@@ -118,6 +128,7 @@ class StoreInteractionController extends Controller
             'countries',
             'suspiciousIps',
             'suspiciousCount',
+            'blockedIps',
             'blockedCount'
         ));
     }
@@ -135,6 +146,7 @@ class StoreInteractionController extends Controller
         }
 
         $items = $query->paginate(30)->withQueryString();
+        $this->attachStoreNames($items);
         $suspiciousCount = SuspiciousIp::query()->where('status', SuspiciousIp::STATUS_OPEN)->count();
         $blockedCount = BlockedIp::query()->count();
         $blockedIps = BlockedIp::cachedList();
@@ -231,5 +243,41 @@ class StoreInteractionController extends Controller
         $suspiciousIp->save();
 
         return redirect()->back()->with('success', 'Đã cập nhật trạng thái IP');
+    }
+
+    private function attachStoreNames($items): void
+    {
+        $missingIps = collect($items->items())
+            ->filter(fn ($item) => empty($item->store_names))
+            ->pluck('ip')
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        if ($missingIps === []) {
+            return;
+        }
+
+        $rows = StoreViewLog::query()
+            ->whereIn('ip', $missingIps)
+            ->whereNotNull('store_name')
+            ->where('store_name', '<>', '')
+            ->orderByDesc('id')
+            ->get(['ip', 'store_name']);
+
+        $grouped = [];
+        foreach ($rows as $row) {
+            $grouped[$row->ip] ??= [];
+            if (!in_array($row->store_name, $grouped[$row->ip], true)) {
+                $grouped[$row->ip][] = $row->store_name;
+            }
+        }
+
+        foreach ($items as $item) {
+            if (empty($item->store_names) && !empty($grouped[$item->ip])) {
+                $item->setAttribute('store_names', $grouped[$item->ip]);
+            }
+        }
     }
 }
