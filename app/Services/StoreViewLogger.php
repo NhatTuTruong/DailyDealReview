@@ -24,6 +24,10 @@ class StoreViewLogger
             return;
         }
 
+        if ($this->shouldSkipIp($request->ip() ?: '')) {
+            return;
+        }
+
         if ($eventType === 'view' && $this->isPrefetch($request)) {
             return;
         }
@@ -67,7 +71,7 @@ class StoreViewLogger
         $eventType = $payload['event_type'] ?? 'view';
         $fromGoogleAds = (bool) ($payload['from_google_ads'] ?? false);
 
-        if ($eventType === 'leave') {
+        if ($this->shouldSkipIp($ip) || $eventType === 'leave') {
             return;
         }
 
@@ -132,6 +136,16 @@ class StoreViewLogger
         } catch (Throwable $e) {
             report($e);
         }
+    }
+
+    private function shouldSkipIp(?string $ip): bool
+    {
+        $ip = trim((string) $ip);
+        if ($ip === '') {
+            return false;
+        }
+
+        return in_array($ip, config('store_view_log.skip_ips', []), true);
     }
 
     private function isPrefetch(Request $request): bool

@@ -112,6 +112,24 @@ class StoreViewLoggerTest extends TestCase
         $this->assertSame(0, StoreViewLog::query()->where('ip', self::IP)->count());
     }
 
+    public function test_skip_ips_are_not_recorded(): void
+    {
+        config(['store_view_log.skip_ips' => [self::IP, '10.0.0.9']]);
+
+        $this->logger->record($this->payload('view'));
+        $this->logger->record($this->payload('affiliate_click', [
+            'target_url' => 'https://aff.example/1',
+        ]));
+
+        $this->assertSame(0, StoreViewLog::query()->where('ip', self::IP)->count());
+
+        $otherIp = '203.0.113.81';
+        StoreViewLog::query()->where('ip', $otherIp)->delete();
+        $this->logger->record($this->payload('view', ['ip' => $otherIp]));
+        $this->assertSame(1, StoreViewLog::query()->where('ip', $otherIp)->count());
+        StoreViewLog::query()->where('ip', $otherIp)->delete();
+    }
+
     public function test_googlebot_is_logged_as_bot_device(): void
     {
         $this->logger->record($this->payload('view', [
